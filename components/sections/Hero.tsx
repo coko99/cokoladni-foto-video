@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { heroStats, site } from "@/lib/content";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/ui/Logo";
 
 const statIcons: Record<string, React.ReactNode> = {
   camera: (
@@ -83,15 +83,7 @@ export function Hero() {
           className="relative flex justify-center"
         >
           <div className="logo-glow logo-neon relative rounded-full border-2 border-accent/30 bg-[#05070d]/80 p-6 sm:p-8">
-            <Image
-              src="/images/logo.png"
-              alt={site.name}
-              width={220}
-              height={220}
-              priority
-              unoptimized
-              className="h-40 w-40 sm:h-52 sm:w-52"
-            />
+            <Logo size="hero" priority />
           </div>
           <div
             className="absolute -inset-8 -z-10 rounded-full opacity-40 blur-3xl"

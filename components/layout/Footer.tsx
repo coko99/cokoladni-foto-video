@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   navLinks,
   site,
@@ -7,6 +6,7 @@ import {
   songsPageHref,
 } from "@/lib/content";
 import { NavLink } from "@/components/ui/NavLink";
+import { Logo } from "@/components/ui/Logo";
 
 export function Footer() {
   return (
@@ -15,14 +15,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="mb-5 flex items-center gap-3">
-              <Image
-                src="/images/logo.png"
-                alt={site.name}
-                width={40}
-                height={40}
-                className="logo-neon"
-                unoptimized
-              />
+              <Logo size="sm" className="h-10 w-10" />
               <span className="font-display text-lg font-medium">
                 {site.name}
               </span>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   chatQuickReplies,
@@ -171,13 +171,7 @@ export function ChatBot() {
             className="fixed bottom-24 right-5 z-[60] flex w-[min(100vw-2.5rem,380px)] flex-col overflow-hidden rounded-2xl border border-accent/25 bg-[#05070d]/95 shadow-[0_0_60px_rgba(101,227,255,0.15)] backdrop-blur-xl sm:right-8"
           >
             <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3.5">
-              <Image
-                src="/images/logo.png"
-                alt={site.name}
-                width={36}
-                height={36}
-                className="logo-neon h-9 w-9 rounded-full"
-              />
+              <Logo size="sm" className="rounded-full" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-white">
                   ČOKOLADNI AGENT

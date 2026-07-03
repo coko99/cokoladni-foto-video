@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   description:
     "Premium fotografija i video produkcija za svadbe, krštenja, rođendane i posebne trenutke. Trenutke pretvaramo u uspomene koje traju.",
   icons: {
-    icon: [{ url: "/images/logo.png", type: "image/png" }],
-    apple: "/images/logo.png",
-    shortcut: "/images/logo.png",
+    icon: [{ url: "/images/logo-sm.png", type: "image/png" }],
+    apple: "/images/logo-sm.png",
+    shortcut: "/images/logo-sm.png",
   },
 };
 

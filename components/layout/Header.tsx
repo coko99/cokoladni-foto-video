@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +13,7 @@ import {
   songsPageHref,
 } from "@/lib/content";
 import { NavLink } from "@/components/ui/NavLink";
+import { Logo } from "@/components/ui/Logo";
 
 const navLinkClass =
   "text-sm font-medium transition-colors duration-300 hover:text-accent";
@@ -88,14 +88,7 @@ export function Header() {
         >
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div className="flex items-center gap-3">
-              <Image
-                src="/images/logo.png"
-                alt={site.name}
-                width={36}
-                height={36}
-                className="logo-neon h-9 w-9"
-                unoptimized
-              />
+              <Logo size="sm" />
               <span className="font-display text-base text-white">{site.name}</span>
             </div>
             <button
@@ -196,15 +189,7 @@ export function Header() {
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-8 lg:py-4">
           <NavLink href="/" onNavigate={closeMenu} className="flex items-center gap-3">
-            <Image
-              src="/images/logo.png"
-              alt={site.name}
-              width={44}
-              height={44}
-              className="logo-neon h-10 w-10 sm:h-11 sm:w-11"
-              unoptimized
-              priority
-            />
+            <Logo size="md" priority />
             <span className="hidden font-display text-sm font-medium text-white sm:block">
               {site.name}
             </span>
