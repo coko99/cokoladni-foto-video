@@ -19,7 +19,7 @@ export const site = {
   phone: "062 187 2069",
   phoneHref: "tel:+381621872069",
   instagram: "https://instagram.com/cokoladni.photo",
-  email: "info@cokoladni.photo",
+  email: "info@cokoladni.rs",
 };
 
 export const navLinks = [
