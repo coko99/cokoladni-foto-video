@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { handleHashNavClick } from "@/lib/hash-nav";
 
 type ButtonVariant = "premium" | "ghost";
 
@@ -17,6 +21,9 @@ export function Button({
   className = "",
   external,
 }: ButtonProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+
   const base =
     "inline-flex h-12 items-center justify-center rounded-full px-8 text-sm font-semibold tracking-wide";
   const styles =
@@ -41,7 +48,16 @@ export function Button({
   }
 
   return (
-    <Link href={href} className={`${base} ${styles} ${className}`}>
+    <Link
+      href={href}
+      className={`${base} ${styles} ${className}`}
+      onClick={(e) => {
+        const handled = handleHashNavClick(href, pathname, {
+          navigate: (url) => router.push(url),
+        });
+        if (handled) e.preventDefault();
+      }}
+    >
       {children}
     </Link>
   );

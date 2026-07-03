@@ -89,6 +89,7 @@ export function Hero() {
               width={220}
               height={220}
               priority
+              unoptimized
               className="h-40 w-40 sm:h-52 sm:w-52"
             />
           </div>

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Inter, Montserrat, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { HashScrollHandler } from "@/components/layout/HashScrollHandler";
 import { ChatBot } from "@/components/chat/ChatBot";
 
 const inter = Inter({
@@ -45,6 +47,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans bg-bg-deep text-text-primary">
         <AnimatedBackground />
+        <Suspense>
+          <HashScrollHandler />
+        </Suspense>
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

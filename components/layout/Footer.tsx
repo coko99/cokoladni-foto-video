@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import {
   navLinks,
   site,
@@ -7,6 +6,7 @@ import {
   songsCategoryHref,
   songsPageHref,
 } from "@/lib/content";
+import { NavLink } from "@/components/ui/NavLink";
 
 export function Footer() {
   return (
@@ -21,6 +21,7 @@ export function Footer() {
                 width={40}
                 height={40}
                 className="logo-neon"
+                unoptimized
               />
               <span className="font-display text-lg font-medium">
                 {site.name}
@@ -38,21 +39,21 @@ export function Footer() {
             <ul className="space-y-2.5">
               {navLinks.map((link) => (
                 <li key={link.href}>
-                  <Link
+                  <NavLink
                     href={link.href}
                     className="text-sm text-text-muted transition hover:text-accent"
                   >
                     {link.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
               <li>
-                <Link
+                <NavLink
                   href={songsPageHref}
                   className="text-sm text-text-muted transition hover:text-accent"
                 >
                   Pesme za veselja
-                </Link>
+                </NavLink>
               </li>
             </ul>
           </div>
@@ -64,12 +65,12 @@ export function Footer() {
             <ul className="space-y-2.5">
               {songCategories.map((cat) => (
                 <li key={cat.id}>
-                  <Link
+                  <NavLink
                     href={songsCategoryHref(cat.id)}
                     className="text-sm text-text-muted transition hover:text-accent"
                   >
                     {cat.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
             </ul>
