@@ -33,7 +33,7 @@ export function Services() {
 
         <FadeIn delay={0.3}>
           <div className="mt-12 text-center">
-            <Button href="/#kontakt">Zakaži fotografisanje</Button>
+            <Button href="/kontakt">Zakaži fotografisanje</Button>
           </div>
         </FadeIn>
       </div>

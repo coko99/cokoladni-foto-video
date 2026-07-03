@@ -52,8 +52,8 @@ export function Hero() {
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button href="/#kontakt">Zakaži fotografisanje</Button>
-            <Button href="/#galerija" variant="ghost">
+            <Button href="/kontakt">Zakaži fotografisanje</Button>
+            <Button href="/portfolio" variant="ghost">
               Pogledaj galeriju
             </Button>
           </div>

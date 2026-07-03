@@ -24,17 +24,18 @@ export const site = {
 
 export const navLinks = [
   { label: "Početna", href: "/" },
-  { label: "Usluge", href: "/#usluge" },
-  { label: "Galerija", href: "/#galerija" },
-  { label: "O nama", href: "/#o-nama" },
-  { label: "Zašto mi", href: "/#zasto-mi" },
-  { label: "Kontakt", href: "/#kontakt" },
+  { label: "Usluge", href: "/usluge" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Paketi", href: "/paketi" },
+  { label: "O nama", href: "/o-nama" },
+  { label: "Proces", href: "/proces" },
+  { label: "Kontakt", href: "/kontakt" },
 ];
 
-export const songsPageHref = "/#pesme";
+export const songsPageHref = "/pesme";
 
 export function songsCategoryHref(categoryId: string) {
-  return `/?kategorija=${categoryId}#pesme`;
+  return `/pesme?kategorija=${categoryId}`;
 }
 
 export const heroStats = [

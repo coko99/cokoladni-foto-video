@@ -171,7 +171,7 @@ export function Header() {
             </div>
 
             <NavLink
-              href="/#kontakt"
+              href="/kontakt"
               onNavigate={closeMenu}
               className="btn-premium mx-2 mt-6 block rounded-full py-3.5 text-center text-base font-semibold"
             >
@@ -211,7 +211,7 @@ export function Header() {
           </NavLink>
 
           <nav className="hidden items-center gap-4 xl:gap-6 lg:flex">
-            {navLinks.slice(0, 2).map((link) => (
+            {navLinks.slice(0, 4).map((link) => (
               <NavLink key={link.href} href={link.href} className={linkClass(link.href)}>
                 {link.label}
               </NavLink>
@@ -219,13 +219,13 @@ export function Header() {
 
             <SongsDropdown pathname={pathname} linkClass={linkClass} />
 
-            {navLinks.slice(2).map((link) => (
+            {navLinks.slice(4).map((link) => (
               <NavLink key={link.href} href={link.href} className={linkClass(link.href)}>
                 {link.label}
               </NavLink>
             ))}
             <NavLink
-              href="/#kontakt"
+              href="/kontakt"
               className="btn-premium inline-flex h-10 items-center rounded-full px-6 text-xs font-semibold uppercase tracking-wider"
             >
               Rezerviši
@@ -269,7 +269,7 @@ function SongsDropdown({
   linkClass: (href: string) => string;
 }) {
   const [open, setOpen] = useState(false);
-  const songsActive = pathname === "/" || pathname.startsWith("/pesme");
+  const songsActive = pathname === "/pesme" || pathname.startsWith("/pesme");
 
   return (
     <div
