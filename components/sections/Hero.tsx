@@ -84,7 +84,7 @@ export function Hero() {
         >
           <div className="logo-glow logo-neon relative rounded-full border-2 border-accent/30 bg-[#05070d]/80 p-6 sm:p-8">
             <Image
-              src="/images/logo.svg"
+              src="/images/logo.png"
               alt={site.name}
               width={220}
               height={220}

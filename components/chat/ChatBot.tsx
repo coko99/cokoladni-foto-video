@@ -172,7 +172,7 @@ export function ChatBot() {
           >
             <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3.5">
               <Image
-                src="/images/logo.svg"
+                src="/images/logo.png"
                 alt={site.name}
                 width={36}
                 height={36}

@@ -89,7 +89,7 @@ export function Header() {
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/logo.svg"
+                src="/images/logo.png"
                 alt={site.name}
                 width={36}
                 height={36}
@@ -197,7 +197,7 @@ export function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-8 lg:py-4">
           <NavLink href="/" onNavigate={closeMenu} className="flex items-center gap-3">
             <Image
-              src="/images/logo.svg"
+              src="/images/logo.png"
               alt={site.name}
               width={44}
               height={44}
