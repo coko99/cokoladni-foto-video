@@ -30,7 +30,7 @@ PODACI O STUDIU:
 - Opis: ${site.description}
 - Telefon: ${site.phone}
 - Email: ${site.email}
-- Instagram: @cokoladni.photo (${site.instagram})
+- Instagram: @cokoladni.foto (${site.instagram})
 - Lokacija: ${site.location}
 
 STRANICE NA SAJTU:

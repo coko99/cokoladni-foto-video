@@ -1,10 +1,4 @@
-import {
-  navLinks,
-  site,
-  songCategories,
-  songsCategoryHref,
-  songsPageHref,
-} from "@/lib/content";
+import { footerNavLinks, site } from "@/lib/content";
 import { NavLink } from "@/components/ui/NavLink";
 import { Logo } from "@/components/ui/Logo";
 
@@ -12,7 +6,7 @@ export function Footer() {
   return (
     <footer className="relative border-t border-white/5 bg-bg-charcoal/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
           <div>
             <div className="mb-5 flex items-center gap-3">
               <Logo size="sm" className="h-10 w-10" />
@@ -30,39 +24,13 @@ export function Footer() {
               Navigacija
             </h3>
             <ul className="space-y-2.5">
-              {navLinks.map((link) => (
+              {footerNavLinks.map((link) => (
                 <li key={link.href}>
                   <NavLink
                     href={link.href}
                     className="text-sm text-text-muted transition hover:text-accent"
                   >
                     {link.label}
-                  </NavLink>
-                </li>
-              ))}
-              <li>
-                <NavLink
-                  href={songsPageHref}
-                  className="text-sm text-text-muted transition hover:text-accent"
-                >
-                  Pesme za veselja
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-              Pesme za veselja
-            </h3>
-            <ul className="space-y-2.5">
-              {songCategories.map((cat) => (
-                <li key={cat.id}>
-                  <NavLink
-                    href={songsCategoryHref(cat.id)}
-                    className="text-sm text-text-muted transition hover:text-accent"
-                  >
-                    {cat.label}
                   </NavLink>
                 </li>
               ))}
@@ -87,7 +55,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="transition hover:text-accent"
                 >
-                  @cokoladni.photo
+                  @cokoladni.foto
                 </a>
               </li>
             </ul>

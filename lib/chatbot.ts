@@ -53,7 +53,7 @@ export const chatResponses: Record<string, Omit<ChatMessage, "id" | "role">> = {
     ],
   },
   kontakt: {
-    text: `Možete nas kontaktirati na:\n\n📞 ${site.phone}\n📍 ${site.location}\n📸 Instagram: @cokoladni.photo\n✉️ ${site.email}`,
+    text: `Možete nas kontaktirati na:\n\n📞 ${site.phone}\n📍 ${site.location}\n📸 Instagram: @cokoladni.foto\n✉️ ${site.email}`,
     links: [
       { label: "Kontakt stranica", href: "/kontakt" },
       { label: "Instagram", href: site.instagram },

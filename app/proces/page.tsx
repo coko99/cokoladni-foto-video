@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/layout/PageShell";
 import { Process } from "@/components/sections/Process";
+import { ProcessContactCta } from "@/components/sections/ProcessContactCta";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = pageMetadata(
@@ -12,6 +13,7 @@ export default function ProcesPage() {
   return (
     <PageShell>
       <Process />
+      <ProcessContactCta />
     </PageShell>
   );
 }

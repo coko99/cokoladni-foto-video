@@ -1,10 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { services } from "@/lib/content";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ServiceCard } from "@/components/ui/ServiceCard";
+import { ServiceBanner } from "@/components/ui/ServiceBanner";
 import { Button } from "@/components/ui/Button";
 
 export function Services() {
@@ -19,20 +18,20 @@ export function Services() {
           />
         </FadeIn>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-16 lg:grid-cols-3 lg:gap-6">
           {services.map((service, i) => (
-            <FadeIn key={service.id} delay={i * 0.04}>
-              <ServiceCard
-                title={service.title}
-                description={service.description}
-                icon={service.icon}
-              />
-            </FadeIn>
+            <ServiceBanner
+              key={service.id}
+              title={service.title}
+              description={service.description}
+              image={service.image}
+              index={i}
+            />
           ))}
         </div>
 
-        <FadeIn delay={0.3}>
-          <div className="mt-12 text-center">
+        <FadeIn delay={0.2}>
+          <div className="mt-14 text-center md:mt-16">
             <Button href="/kontakt">Zakaži fotografisanje</Button>
           </div>
         </FadeIn>
