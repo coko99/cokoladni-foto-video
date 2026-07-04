@@ -87,9 +87,11 @@ export function Header() {
           style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
         >
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Logo size="sm" />
-              <span className="font-display text-base text-white">{site.name}</span>
+              <span className="header-brand-neon text-sm font-semibold uppercase tracking-[0.2em]">
+                ČOKOLADNI
+              </span>
             </div>
             <button
               type="button"
@@ -188,8 +190,11 @@ export function Header() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-8 lg:py-4">
-          <NavLink href="/" onNavigate={closeMenu} className="flex items-center gap-3">
+          <NavLink href="/" onNavigate={closeMenu} className="flex items-center gap-2.5 sm:gap-3">
             <Logo size="md" priority />
+            <span className="header-brand-neon text-[15px] font-semibold uppercase leading-none tracking-[0.22em] sm:hidden">
+              ČOKOLADNI
+            </span>
             <span className="hidden font-display text-sm font-medium text-white sm:block">
               {site.name}
             </span>

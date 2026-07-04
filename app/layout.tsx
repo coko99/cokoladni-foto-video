@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Inter, Montserrat, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
+import { Preloader } from "@/components/ui/Preloader";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HashScrollHandler } from "@/components/layout/HashScrollHandler";
@@ -46,6 +47,7 @@ export default function RootLayout({
       className={`${inter.variable} ${montserrat.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-bg-deep text-text-primary">
+        <Preloader />
         <AnimatedBackground />
         <Suspense>
           <HashScrollHandler />

@@ -1,6 +1,7 @@
 import { footerNavLinks, site } from "@/lib/content";
 import { NavLink } from "@/components/ui/NavLink";
 import { Logo } from "@/components/ui/Logo";
+import { SocialNeonLinks } from "@/components/ui/SocialNeonLinks";
 
 export function Footer() {
   return (
@@ -49,14 +50,12 @@ export function Footer() {
               </li>
               <li>{site.location}</li>
               <li>
-                <a
-                  href={site.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition hover:text-accent"
-                >
-                  @cokoladni.foto
+                <a href={`mailto:${site.email}`} className="transition hover:text-accent">
+                  {site.email}
                 </a>
+              </li>
+              <li className="pt-2">
+                <SocialNeonLinks />
               </li>
             </ul>
           </div>

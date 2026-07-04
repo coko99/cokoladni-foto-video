@@ -20,6 +20,8 @@ export const site = {
   phoneHref: "tel:+381621872069",
   whatsapp: "https://wa.me/381621872069",
   instagram: "https://instagram.com/cokoladni.foto",
+  facebook: "https://www.facebook.com/people/%C4%8Cokoladni-FOTO/61581371400843/",
+  tiktok: "https://www.tiktok.com/@cokomokoladni",
   email: "info@cokoladni.rs",
 };
 

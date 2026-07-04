@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ContactForm } from "@/components/sections/ContactForm";
+import { SocialNeonLinks } from "@/components/ui/SocialNeonLinks";
 
 export function Contact() {
   return (
@@ -55,13 +56,14 @@ export function Contact() {
                     <p className="text-xs uppercase tracking-widest text-accent">Lokacija</p>
                     <p className="mt-1 text-lg font-medium">{site.location}</p>
                   </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-accent">Društvene mreže</p>
+                    <SocialNeonLinks className="mt-3" />
+                  </div>
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Button href={site.phoneHref}>Pozovi odmah</Button>
-                  <Button href={site.instagram} variant="ghost" external>
-                    Instagram
-                  </Button>
                 </div>
               </div>
 
