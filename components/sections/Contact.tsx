@@ -16,10 +16,11 @@ export function Contact() {
               alt=""
               fill
               sizes="100vw"
-              className="object-cover opacity-20"
+              className="scale-105 object-cover object-left blur-[6px] brightness-[0.45]"
               aria-hidden
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#05070D]/92 via-[#004AAD]/15 to-[#05070D]/95" />
+            <div className="absolute inset-0 bg-[#05070D]/82" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#05070D]/90 via-[#004AAD]/10 to-[#05070D]/88" />
 
             <div className="relative grid gap-12 lg:grid-cols-5 lg:gap-16">
               <div className="lg:col-span-2">

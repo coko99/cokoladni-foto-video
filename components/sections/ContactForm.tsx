@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { dogadjajOptions, uslugaOptions } from "@/lib/contact-form";
+import { OptionPicker } from "@/components/ui/OptionPicker";
 
 const inputClass =
   "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 transition focus:border-accent/50 focus:bg-white/8 focus:outline-none focus:ring-2 focus:ring-accent/20";
@@ -12,15 +13,23 @@ const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider te
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [dogadjaj, setDogadjaj] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
     setErrorMsg("");
 
+    if (!dogadjaj) {
+      setErrorMsg("Izaberite tip događaja.");
+      setStatus("error");
+      return;
+    }
+
     const form = e.currentTarget;
     const fd = new FormData(form);
     const payload = Object.fromEntries(fd.entries());
+    payload.dogadjaj = dogadjaj;
 
     try {
       const res = await fetch("/api/contact", {
@@ -38,6 +47,7 @@ export function ContactForm() {
 
       setStatus("success");
       form.reset();
+      setDogadjaj("");
     } catch {
       setErrorMsg("Greška u mreži. Proverite konekciju i pokušajte ponovo.");
       setStatus("error");
@@ -78,20 +88,16 @@ export function ContactForm() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="dogadjaj" className={labelClass}>
-            Događaj *
-          </label>
-          <select id="dogadjaj" name="dogadjaj" required className={inputClass} defaultValue="">
-            <option value="" disabled>
-              Izaberite događaj
-            </option>
-            {dogadjajOptions.map((opt) => (
-              <option key={opt} value={opt} className="bg-[#05070d]">
-                {opt}
-              </option>
-            ))}
-          </select>
+        <div className="sm:col-span-2">
+          <input type="hidden" name="dogadjaj" value={dogadjaj} />
+          <OptionPicker
+            label="Događaj"
+            options={dogadjajOptions.map((opt) => ({ value: opt, label: opt }))}
+            value={dogadjaj}
+            onChange={setDogadjaj}
+            required
+            placeholder="Izaberi tip događaja"
+          />
         </div>
         <div>
           <label htmlFor="datum" className={labelClass}>

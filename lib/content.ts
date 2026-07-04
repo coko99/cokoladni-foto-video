@@ -186,8 +186,6 @@ export const portfolioCategories = [
 export type PortfolioCategory = (typeof portfolioCategories)[number];
 
 export const heroImage = "/images/gallery/01.jpg";
-export const aboutImage = "/images/gallery/03.jpg";
-export const contactBgImage = "/images/gallery/06.jpg";
 
 export const portfolioItems = [
   {
@@ -346,6 +344,52 @@ export const homeImages = {
   processContact: "/images/home/process-contact.png",
   heroMobile: "/images/home/hero-mobile.png",
   charlieBanner: "/images/home/charlie-banner.png",
+  charlieCapture: "/images/home/charlie-capture.png",
+  contactBg: "/images/home/contact-bg.png",
+  aboutHero: "/images/home/about-hero.png",
+};
+
+export const aboutImage = homeImages.aboutHero;
+export const contactBgImage = homeImages.contactBg;
+
+export const aboutPage = {
+  heroImage: homeImages.aboutHero,
+  heroTitle: "O NAMA",
+  eyebrow: "O nama",
+  name: "Iza brenda Čokoladni Aj-Ti stojim ja — Miloš Mijajlović.",
+  paragraphs: [
+    "Godinama radim u svetu reklama, dizajna, društvenih mreža, fotografije, videa i digitalnog marketinga. To znači da fotografiju i snimanje ne gledam samo kao \"lep kadar\", već kao deo šire priče: kako nešto izgleda, kako se oseća, kako privlači pažnju i kako ostaje upamćeno.",
+    "Čokoladni Foto & Video nastao je kao poseban segment brenda Čokoladni Aj-Ti — za fotografisanje i snimanje venčanja, rođendana, krštenja, proslava i događaja.",
+    "Fotografijom sam počeo da se bavim 2018. godine, najpre kroz restorane, hranu, ambijente, umetnike i vizuelne priče za reklame. Slikao sam detalje koji moraju da probude osećaj: tanjir koji treba da \"zamiriše\" kroz fotografiju, prostor koji mora da prenese atmosferu, umetnika koji treba da pokaže svoj karakter i brend koji mora da ostane u glavi.",
+  ],
+  detailsLead: "Zato dobro znam koliko detalji znače.",
+  details: [
+    "Svetlo.",
+    "Ugao.",
+    "Boja.",
+    "Pokret.",
+    "Osmeh.",
+    "Trenutak koji traje sekund.",
+  ],
+  contrastLines: [
+    "U reklamama se iz jednog detalja gradi utisak.",
+    "Na veselju se iz jednog detalja čuva uspomena.",
+  ],
+  story: [
+    "Baš zato naš pristup nije običan. Ne dolazimo samo da fotografišemo i snimimo šta se desilo. Dolazimo da prepoznamo atmosferu, emociju i priču tog dana — i da je pretvorimo u fotografije i video koji imaju smisao, stil i osećaj.",
+    "Čokoladni Foto & Video spaja iskustvo iz marketinga, reklama i vizuelnog sadržaja sa emocijom pravih događaja.",
+  ],
+  charlieTitle: "A tu je i Čarli — moj šnaucer, maskota i mali čuvar svetla.",
+  closing: [
+    "Ja hvatam kadar.",
+    "Čarli čuva svetlo.",
+    "Zajedno čuvamo uspomene.",
+  ],
+  tagline: [
+    "Čokoladni Foto & Video",
+    "deo brenda Čokoladni Aj-Ti",
+    "za trenutke koji ne zaslužuju da ostanu samo u sećanju.",
+  ],
 };
 
 export const homeHero = {
@@ -399,7 +443,8 @@ export const charlieSection = {
   title: "Ja hvatam kadar. Čarli čuva svetlo.",
   text: "Iza svakog dobrog kadra stoji priprema, oprema i malo magije. Čarli je naš mali čuvar svetla — simbol pažnje, detalja i energije koju unosimo u svaku priču.",
   slogan: "Kamera je moja. Svetlo je Čarlijevo. Uspomene su tvoje.",
-  background: homeImages.charlieBanner,
+  background: homeImages.charlieCapture,
+  imageDesktop: homeImages.charlieCapture,
   image: homeImages.charlieReflector,
 };
 
