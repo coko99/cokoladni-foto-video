@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { GalleryWithStats } from "@/lib/gallery/types";
 import { galleryPublicUrl } from "@/lib/gallery/utils";
-import { EVENT_TYPES, type EventType } from "@/lib/gallery/event-types";
+import { EVENT_TYPES } from "@/lib/gallery/event-types";
 
 export function GalleryList({ galleries }: { galleries: GalleryWithStats[] }) {
   if (!galleries.length) {
@@ -56,7 +56,7 @@ export function CreateGalleryForm() {
   const [username, setUsername] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [eventType, setEventType] = useState<EventType>(EVENT_TYPES[0]);
+  const [eventType, setEventType] = useState<string>(EVENT_TYPES[0]);
   const [hostsInfo, setHostsInfo] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [pin, setPin] = useState("");
@@ -118,7 +118,7 @@ export function CreateGalleryForm() {
         </label>
         <select
           value={eventType}
-          onChange={(e) => setEventType(e.target.value as EventType)}
+          onChange={(e) => setEventType(e.target.value)}
           required
           className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
         >
