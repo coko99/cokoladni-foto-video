@@ -40,5 +40,11 @@ export async function DELETE(
     return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 
+  await admin
+    .from("galleries")
+    .update({ hero_image_id: null })
+    .eq("id", id)
+    .eq("hero_image_id", imageId);
+
   return NextResponse.json({ success: true });
 }

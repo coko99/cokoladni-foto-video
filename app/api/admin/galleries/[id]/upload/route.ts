@@ -30,7 +30,7 @@ export async function POST(
 
     const { data: gallery, error: galleryError } = await admin
       .from("galleries")
-      .select("id")
+      .select("id, hero_image_id")
       .eq("id", id)
       .single();
 
@@ -94,6 +94,13 @@ export async function POST(
         },
         { status: 500 }
       );
+    }
+
+    if (!gallery.hero_image_id && uploaded[0]) {
+      await admin
+        .from("galleries")
+        .update({ hero_image_id: uploaded[0].id })
+        .eq("id", id);
     }
 
     return NextResponse.json({ uploaded, count: uploaded.length, errors });

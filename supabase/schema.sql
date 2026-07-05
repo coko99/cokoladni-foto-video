@@ -49,6 +49,9 @@ create table if not exists public.selection_images (
   image_id uuid not null references public.gallery_images(id) on delete cascade
 );
 
+alter table public.galleries
+  add column if not exists hero_image_id uuid references public.gallery_images(id) on delete set null;
+
 -- ─── Indeksi ────────────────────────────────────────────────────────────────
 
 create index if not exists idx_galleries_slug on public.galleries(slug);

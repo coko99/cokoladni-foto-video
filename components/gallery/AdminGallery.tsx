@@ -56,12 +56,16 @@ export function CreateGalleryForm() {
   const [username, setUsername] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [eventType, setEventType] = useState<string>(EVENT_TYPES[0]);
+  const [eventType, setEventType] = useState<string>("Svadba");
   const [hostsInfo, setHostsInfo] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  function handleEventTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setEventType(e.target.value);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -118,7 +122,7 @@ export function CreateGalleryForm() {
         </label>
         <select
           value={eventType}
-          onChange={(e) => setEventType(e.target.value)}
+          onChange={handleEventTypeChange}
           required
           className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
         >

@@ -5,6 +5,9 @@ import type { GalleryImage, SelectionWithImages } from "@/lib/gallery/types";
 import { CopyAlbumAccess } from "./CopyAlbumAccess";
 import { AdminImageSorter } from "./AdminImageSorter";
 import { groupImagesByFilename } from "@/lib/gallery/email";
+import { getGalleryCoverImage } from "@/lib/gallery/cover";
+import { getImagePublicUrl } from "@/lib/gallery/utils";
+import Image from "next/image";
 
 type Props = {
   galleryId: string;
@@ -14,6 +17,7 @@ type Props = {
   username: string | null;
   accessCode: string;
   pinPlain: string | null;
+  heroImageId: string | null;
   publicUrl: string;
   initialImages: GalleryImage[];
   initialSelections: SelectionWithImages[];
@@ -27,11 +31,13 @@ export function GalleryAdminDetail({
   username,
   accessCode,
   pinPlain,
+  heroImageId: initialHeroImageId,
   publicUrl,
   initialImages,
   initialSelections,
 }: Props) {
   const [images, setImages] = useState(initialImages);
+  const [heroImageId, setHeroImageId] = useState<string | null>(initialHeroImageId);
   const [selections] = useState(initialSelections);
   const [currentAccessCode, setCurrentAccessCode] = useState(accessCode);
   const [accessCodeInput, setAccessCodeInput] = useState(accessCode);
@@ -117,19 +123,20 @@ export function GalleryAdminDetail({
     }
 
     if (data.uploaded?.length) {
-      setImages((prev) => [
-        ...prev,
-        ...data.uploaded.map(
-          (u: { id: string; filename: string; storage_path: string }, i: number) => ({
-            id: u.id,
-            gallery_id: galleryId,
-            storage_path: u.storage_path,
-            filename: u.filename,
-            sort_order: prev.length + i,
-            created_at: new Date().toISOString(),
-          })
-        ),
-      ]);
+      const newImages = data.uploaded.map(
+        (u: { id: string; filename: string; storage_path: string }, i: number) => ({
+          id: u.id,
+          gallery_id: galleryId,
+          storage_path: u.storage_path,
+          filename: u.filename,
+          sort_order: images.length + i,
+          created_at: new Date().toISOString(),
+        })
+      );
+      setImages((prev) => [...prev, ...newImages]);
+      if (!heroImageId && newImages[0]) {
+        setHeroImageId(newImages[0].id);
+      }
       setUploadProgress(`Uspešno uploadovano: ${data.uploaded.length} slika`);
       setTimeout(() => setUploadProgress(""), 3000);
     } else {
@@ -150,12 +157,20 @@ export function GalleryAdminDetail({
     setDeletingId(null);
 
     if (res.ok) {
-      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      setImages((prev) => {
+        const next = prev.filter((img) => img.id !== imageId);
+        if (heroImageId === imageId) {
+          setHeroImageId(next[0]?.id ?? null);
+        }
+        return next;
+      });
     } else {
       const data = await res.json();
       alert(data.error ?? "Brisanje nije uspelo.");
     }
   }
+
+  const heroImage = getGalleryCoverImage({ hero_image_id: heroImageId }, images);
 
   return (
     <div className="space-y-8">
@@ -271,14 +286,44 @@ export function GalleryAdminDetail({
       </section>
 
       {images.length > 0 && (
+        <section className="glass rounded-2xl p-6">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent/80">
+            Hero naslovna
+          </h2>
+          {heroImage ? (
+            <div className="relative aspect-[21/9] overflow-hidden rounded-2xl border border-accent/25">
+              <Image
+                src={getImagePublicUrl(heroImage.storage_path)}
+                alt={heroImage.filename}
+                fill
+                sizes="(max-width: 768px) 100vw, 1152px"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/80 via-transparent to-transparent" />
+              <p className="absolute bottom-4 left-4 text-sm text-white/90">
+                {heroImage.filename}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-text-muted/50">Izaberite hero sliku ispod.</p>
+          )}
+          <p className="mt-3 text-xs text-text-muted/50">
+            Ova slika se prikazuje na vrhu albuma kada klijent otvori link.
+          </p>
+        </section>
+      )}
+
+      {images.length > 0 && (
         <section>
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent/80">
-            Slike — prevuci za redosled
+            Slike — izaberi hero i prevuci za redosled
           </h2>
           <AdminImageSorter
             galleryId={galleryId}
             images={images}
+            heroImageId={heroImageId}
             onReorder={setImages}
+            onSetHero={setHeroImageId}
             onDelete={handleDeleteImage}
             deletingId={deletingId}
           />

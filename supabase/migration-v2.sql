@@ -67,7 +67,11 @@ alter table public.galleries
   add column if not exists event_type text,
   add column if not exists event_date date;
 
--- 9. Dozvoli upis izbora preko servera (service role)
+-- 9. Hero slika albuma (nezavisno od redosleda u galeriji)
+alter table public.galleries
+  add column if not exists hero_image_id uuid references public.gallery_images(id) on delete set null;
+
+-- 10. Dozvoli upis izbora preko servera (service role)
 drop policy if exists "service_all_selections" on public.selections;
 create policy "service_all_selections" on public.selections
   for all to service_role using (true) with check (true);

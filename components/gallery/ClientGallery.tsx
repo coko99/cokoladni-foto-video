@@ -5,6 +5,7 @@ import type { Gallery, GalleryImage, ImageCounts } from "@/lib/gallery/types";
 import { MasonryGalleryGrid } from "./MasonryGalleryGrid";
 import { AlbumHero } from "./AlbumHero";
 import { groupImagesByFilename } from "@/lib/gallery/email";
+import { getGalleryCoverImage } from "@/lib/gallery/cover";
 import { SENDER_RELATIONS } from "@/lib/gallery/relations";
 
 type Props = {
@@ -35,7 +36,7 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
   const [note, setNote] = useState("");
 
   const total = useMemo(() => totalCount(counts), [counts]);
-  const coverImage = images[0] ?? null;
+  const coverImage = getGalleryCoverImage(gallery, images);
   const summary = useMemo(() => {
     const expanded = expandImageIds(counts);
     const byId = new Map(images.map((img) => [img.id, img]));

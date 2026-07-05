@@ -9,6 +9,7 @@ export type Gallery = {
   hosts_info: string | null;
   event_type: string | null;
   event_date: string | null;
+  hero_image_id: string | null;
   pin_hash: string | null;
   pin_plain: string | null;
   max_selections: number | null;

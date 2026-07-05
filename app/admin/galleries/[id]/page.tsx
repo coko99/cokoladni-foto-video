@@ -82,6 +82,7 @@ export default async function GalleryDetailPage({
       username={data.gallery.username}
       accessCode={data.gallery.access_code}
       pinPlain={data.gallery.pin_plain}
+      heroImageId={data.gallery.hero_image_id}
       publicUrl={galleryPublicUrl(data.gallery.username ?? data.gallery.slug)}
       initialImages={data.images}
       initialSelections={data.selections}
