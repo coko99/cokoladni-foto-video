@@ -2,12 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Inter, Montserrat, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
-import { Preloader } from "@/components/ui/Preloader";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { HashScrollHandler } from "@/components/layout/HashScrollHandler";
-import { ChatBot } from "@/components/chat/ChatBot";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -47,15 +42,9 @@ export default function RootLayout({
       className={`${inter.variable} ${montserrat.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-bg-deep text-text-primary">
-        <Preloader />
-        <AnimatedBackground />
         <Suspense>
-          <HashScrollHandler />
+          <SiteChrome>{children}</SiteChrome>
         </Suspense>
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <ChatBot />
       </body>
     </html>
   );

@@ -33,6 +33,7 @@ export const navLinks = [
   { label: "O nama", href: "/o-nama" },
   { label: "Proces", href: "/proces" },
   { label: "Kontakt", href: "/kontakt" },
+  { label: "Login", href: "/login" },
 ];
 
 export const songsPageHref = "/pesme";
