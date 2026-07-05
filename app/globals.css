@@ -332,3 +332,63 @@ select {
 .social-neon-icon svg {
   filter: drop-shadow(0 0 6px rgba(101, 227, 255, 0.65));
 }
+
+@keyframes upload-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes upload-ring-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes upload-logo-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 16px rgba(101, 227, 255, 0.55))
+      drop-shadow(0 0 36px rgba(101, 227, 255, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(101, 227, 255, 0.95))
+      drop-shadow(0 0 56px rgba(101, 227, 255, 0.45)) brightness(1.1);
+  }
+}
+
+.upload-logo-stage .logo-neon {
+  animation: upload-logo-glow 2.2s ease-in-out infinite;
+}
+
+.upload-neon-ring {
+  pointer-events: none;
+}
+
+.upload-neon-ring-outer {
+  border: 2px solid transparent;
+  border-top-color: rgba(101, 227, 255, 0.95);
+  border-right-color: rgba(101, 227, 255, 0.35);
+  box-shadow:
+    0 0 24px rgba(101, 227, 255, 0.35),
+    inset 0 0 24px rgba(101, 227, 255, 0.08);
+  animation: upload-ring-spin 1.4s linear infinite;
+}
+
+.upload-neon-ring-inner {
+  border: 2px dashed rgba(101, 227, 255, 0.45);
+  box-shadow: 0 0 18px rgba(101, 227, 255, 0.2);
+  animation: upload-ring-spin-reverse 2.4s linear infinite;
+}
+
+.upload-neon-ring-dots {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 300deg,
+    rgba(101, 227, 255, 0.85) 300deg 330deg,
+    transparent 330deg 360deg
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  animation: upload-ring-spin 1s linear infinite;
+}

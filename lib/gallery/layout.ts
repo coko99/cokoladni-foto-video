@@ -26,7 +26,7 @@ export function getTileSize(index: number, aspectRatio?: number): TileSize {
 
 export const tileClasses: Record<TileSize, string> = {
   small: "col-span-1 row-span-2",
-  tall: "col-span-1 row-span-3",
-  wide: "col-span-2 row-span-2",
-  large: "col-span-2 row-span-3",
+  tall: "col-span-1 row-span-2 sm:row-span-3",
+  wide: "col-span-1 row-span-2 sm:col-span-2",
+  large: "col-span-1 row-span-2 sm:col-span-2 md:row-span-3",
 };

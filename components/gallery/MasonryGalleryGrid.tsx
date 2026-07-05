@@ -111,7 +111,7 @@ function MasonryTile({
         className={`absolute bottom-2 right-2 z-20 flex h-10 w-10 items-center justify-center rounded-full transition-all ${
           count > 0
             ? "bg-accent text-bg-deep shadow-[0_0_16px_rgba(101,227,255,0.5)]"
-            : "bg-black/45 text-white/90 opacity-0 group-hover:opacity-100 sm:opacity-100"
+            : "bg-black/55 text-white/90 opacity-100 sm:bg-black/45"
         }`}
         aria-label="Dodaj srce"
       >
@@ -125,7 +125,7 @@ function MasonryTile({
 
 export function MasonryGalleryGrid({ images, counts, onAdd, onRemove }: Props) {
   return (
-    <div className="grid grid-cols-2 auto-rows-[100px] gap-2 sm:grid-cols-3 sm:auto-rows-[110px] md:grid-cols-4 md:gap-3 lg:auto-rows-[120px]">
+    <div className="grid grid-cols-2 auto-rows-[88px] gap-1.5 sm:auto-rows-[100px] sm:gap-2 md:grid-cols-4 md:gap-3 lg:auto-rows-[120px]">
       {images.map((img, index) => (
         <MasonryTile
           key={img.id}

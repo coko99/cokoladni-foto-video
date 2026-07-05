@@ -76,7 +76,7 @@ export function AdminImageSorter({
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <p className="text-xs text-text-muted/50">
           Klikni „Hero” za naslovnu · prevuci za redosled u galeriji
         </p>

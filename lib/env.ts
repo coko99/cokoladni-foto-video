@@ -61,3 +61,12 @@ export function getContactFromEmail() {
     "Cokoladni Foto & Video <onboarding@resend.dev>"
   );
 }
+
+/** Supabase Storage kvota projekta u bajtovima (podrazumevano 1 GB). */
+export function getStorageQuotaBytes() {
+  const gb = Number(process.env.STORAGE_QUOTA_GB ?? "1");
+  if (!Number.isFinite(gb) || gb <= 0) {
+    return 1024 * 1024 * 1024;
+  }
+  return Math.round(gb * 1024 * 1024 * 1024);
+}

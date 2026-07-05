@@ -50,28 +50,28 @@ export function AlbumHero({ title, hostsInfo, eventType, eventDate, coverImage }
       <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/70 to-bg-deep/20" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(101,227,255,0.12),transparent_65%)]" />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 pt-32 sm:pb-20">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-accent/80">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-12 pt-24 sm:pb-16 sm:pt-32">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent/80 sm:text-xs sm:tracking-[0.35em]">
           Čokoladni Foto & Video
         </p>
-        <h1 className="font-display text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">
+        <h1 className="font-display text-2xl font-semibold leading-tight text-white break-words sm:text-4xl md:text-5xl lg:text-6xl">
           <span className="text-gradient-accent">{title}</span>
         </h1>
 
         {(eventType || hostsInfo || formattedDate) && (
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
             {eventType && (
-              <span className="glass rounded-full px-4 py-2 text-sm font-medium text-accent neon-border">
+              <span className="glass rounded-full px-3 py-1.5 text-xs font-medium text-accent neon-border sm:px-4 sm:py-2 sm:text-sm">
                 {eventType}
               </span>
             )}
             {hostsInfo && (
-              <span className="glass rounded-full px-4 py-2 text-sm text-text-primary neon-border">
+              <span className="glass max-w-full rounded-full px-3 py-1.5 text-xs text-text-primary neon-border break-words sm:px-4 sm:py-2 sm:text-sm">
                 {hostsInfo}
               </span>
             )}
             {formattedDate && (
-              <span className="glass rounded-full px-4 py-2 text-sm text-accent">
+              <span className="glass rounded-full px-3 py-1.5 text-xs text-accent sm:px-4 sm:py-2 sm:text-sm">
                 {formattedDate}
               </span>
             )}
@@ -81,7 +81,7 @@ export function AlbumHero({ title, hostsInfo, eventType, eventDate, coverImage }
         <button
           type="button"
           onClick={scrollToGallery}
-          className="btn-premium mt-10 inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold tracking-wide animate-neon-pulse"
+          className="btn-premium mt-8 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-wide animate-neon-pulse sm:mt-10 sm:inline-flex sm:w-auto sm:px-8 sm:py-3.5"
         >
           Pogledaj galeriju
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>

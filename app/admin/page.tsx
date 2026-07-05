@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GalleryList } from "@/components/gallery/AdminGallery";
+import { StorageUsageCard } from "@/components/gallery/StorageUsageBadge";
 import type { GalleryWithStats } from "@/lib/gallery/types";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -48,16 +49,19 @@ export default async function AdminPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6">
+        <StorageUsageCard />
+      </div>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold">Galerije</h1>
+          <h1 className="font-display text-xl font-semibold sm:text-2xl">Galerije</h1>
           <p className="mt-1 text-sm text-text-muted/60">
             Upravljajte galerijama i pratite izbore klijenata
           </p>
         </div>
         <Link
           href="/admin/galleries/new"
-          className="btn-premium rounded-xl px-5 py-2.5 text-sm font-semibold"
+          className="btn-premium w-full rounded-xl px-5 py-2.5 text-center text-sm font-semibold sm:w-auto"
         >
           + Nova galerija
         </Link>

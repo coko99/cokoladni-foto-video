@@ -129,10 +129,10 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
 
   if (!accessVerified) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <form
           onSubmit={verifyAccess}
-          className="glass-strong w-full max-w-sm rounded-2xl p-6 space-y-4"
+          className="glass-strong w-full max-w-sm rounded-2xl p-5 space-y-4 sm:p-6"
         >
           <h2 className="text-center font-display text-xl font-semibold text-gradient-accent">
             {gallery.title}
@@ -148,7 +148,7 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
               required
-              className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-center text-lg font-semibold tracking-[0.3em] outline-none focus:border-accent/60"
+              className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-center text-base font-semibold tracking-[0.2em] outline-none focus:border-accent/60 sm:text-lg sm:tracking-[0.3em]"
               placeholder="ABC123"
               autoFocus
             />
@@ -184,15 +184,15 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
 
   if (!activeSender) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="glass-strong w-full max-w-sm rounded-2xl p-6 space-y-5">
+      <div className="flex min-h-screen items-center justify-center px-4 py-8">
+        <div className="glass-strong w-full max-w-sm rounded-2xl p-5 space-y-5 sm:p-6">
           <h2 className="text-center font-display text-xl font-semibold text-gradient-accent">
             Ko ste vi?
           </h2>
-          <p className="text-center text-sm text-text-muted/60">
+          <p className="text-center text-sm text-text-muted/60 break-words">
             Izaberite ko bira fotografije u albumu „{gallery.title}"
           </p>
-          <div className="grid gap-2">
+          <div className="grid max-h-[60vh] gap-2 overflow-y-auto sm:max-h-none">
             {SENDER_RELATIONS.map((rel) => (
               <button
                 key={rel}
@@ -210,7 +210,7 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-bg-deep pb-32">
+    <div className="min-h-screen bg-bg-deep pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))]">
       <AlbumHero
         title={gallery.title}
         hostsInfo={gallery.hosts_info ?? gallery.client_name}
@@ -227,19 +227,21 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
         </div>
       )}
 
-      <section id="album-gallery" className="relative mx-auto max-w-6xl px-3 py-10 sm:px-4">
-        <div className="mb-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-accent/70">
-            Bira: <span className="text-accent">{activeSender}</span>
+      <section id="album-gallery" className="relative mx-auto max-w-6xl px-3 py-8 sm:px-4 sm:py-10">
+        <div className="mb-6 text-center sm:mb-8">
+          <p className="flex flex-col items-center gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-accent/70 sm:flex-row sm:justify-center sm:gap-0 sm:tracking-[0.35em]">
+            <span>
+              Bira: <span className="text-accent">{activeSender}</span>
+            </span>
             <button
               type="button"
               onClick={() => setActiveSender(null)}
-              className="ml-3 text-text-muted/50 underline-offset-2 hover:text-accent hover:underline"
+              className="sm:ml-3 text-text-muted/50 underline-offset-2 hover:text-accent hover:underline normal-case tracking-normal"
             >
               promeni
             </button>
           </p>
-          <h2 className="mt-3 font-display text-2xl font-semibold text-gradient-accent sm:text-3xl">
+          <h2 className="mt-3 font-display text-xl font-semibold text-gradient-accent sm:text-2xl md:text-3xl">
             Izaberite fotografije
           </h2>
           <p className="mt-2 text-sm text-text-muted/60">
@@ -259,15 +261,15 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
       </section>
 
       {total > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-accent/25 bg-bg-deep/95 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-            <div>
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-accent/25 bg-bg-deep/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom,0px)]">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-accent">{total} slika izabrano</p>
               <p className="text-xs text-text-muted/50">{summary.length} različitih fajlova</p>
             </div>
             <button
               onClick={openSubmitForm}
-              className="btn-premium shrink-0 rounded-xl px-6 py-2.5 text-sm font-semibold animate-neon-pulse"
+              className="btn-premium w-full shrink-0 rounded-xl px-6 py-2.5 text-sm font-semibold animate-neon-pulse sm:w-auto"
             >
               Pošalji izbor
             </button>
@@ -276,10 +278,10 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
       )}
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0 sm:items-center sm:p-4">
           <form
             onSubmit={handleSubmit}
-            className="glass-strong w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+            className="glass-strong w-full max-w-md rounded-t-2xl rounded-b-none p-5 space-y-4 max-h-[92vh] overflow-y-auto sm:rounded-2xl sm:p-6"
           >
             <h3 className="font-display text-lg font-semibold">Potvrda slanja</h3>
 

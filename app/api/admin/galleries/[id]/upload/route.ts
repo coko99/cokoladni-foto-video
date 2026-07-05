@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BUCKET, ensureGalleryBucket } from "@/lib/gallery/storage";
+import { sanitizeFilename } from "@/lib/gallery/filename";
 
 export async function POST(
   request: Request,
@@ -48,7 +49,7 @@ export async function POST(
     const errors: string[] = [];
 
     for (const file of files) {
-      const filename = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filename = sanitizeFilename(file.name);
       const storagePath = `${id}/${filename}`;
 
       const buffer = Buffer.from(await file.arrayBuffer());

@@ -72,8 +72,8 @@ export function LoginForm({ redirect }: { redirect?: string }) {
 
   return (
     <div className="w-full max-w-md">
-      <div className="mb-8 text-center">
-        <h1 className="font-display text-3xl font-semibold text-gradient-accent">
+      <div className="mb-6 text-center sm:mb-8">
+        <h1 className="font-display text-2xl font-semibold text-gradient-accent sm:text-3xl">
           Čokoladni Galerija
         </h1>
         <p className="mt-2 text-sm text-text-muted/70">
@@ -166,7 +166,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
               required
-              className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-center text-lg font-semibold tracking-[0.3em] outline-none focus:border-accent/60"
+              className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-center text-base font-semibold tracking-[0.2em] outline-none focus:border-accent/60 sm:text-lg sm:tracking-[0.3em]"
               placeholder="ABC123"
             />
           </div>

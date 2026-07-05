@@ -8,6 +8,8 @@ import { GalleryActionsMenu } from "./GalleryActionsMenu";
 import { groupImagesByFilename } from "@/lib/gallery/email";
 import { getGalleryCoverImage } from "@/lib/gallery/cover";
 import { getImagePublicUrl } from "@/lib/gallery/utils";
+import { uploadGalleryImages } from "@/lib/gallery/upload-images";
+import { UploadOverlay } from "./UploadOverlay";
 import Image from "next/image";
 
 type Props = {
@@ -47,6 +49,9 @@ export function GalleryAdminDetail({
   const [accessSaveMsg, setAccessSaveMsg] = useState("");
   const [accessSaveError, setAccessSaveError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadCurrent, setUploadCurrent] = useState(0);
+  const [uploadTotal, setUploadTotal] = useState(0);
+  const [uploadFilename, setUploadFilename] = useState("");
   const [uploadProgress, setUploadProgress] = useState("");
   const [uploadError, setUploadError] = useState("");
   const [displayPin, setDisplayPin] = useState(pinPlain);
@@ -103,46 +108,48 @@ export function GalleryAdminDetail({
 
   async function handleUpload(files: FileList | null) {
     if (!files?.length) return;
+    const total = files.length;
     setUploading(true);
     setUploadError("");
-    setUploadProgress(`Upload 0/${files.length}...`);
+    setUploadCurrent(0);
+    setUploadTotal(total);
+    setUploadFilename("");
+    setUploadProgress(`Upload 0/${total}...`);
 
-    const formData = new FormData();
-    Array.from(files).forEach((f) => formData.append("files", f));
+    const { uploaded, errors } = await uploadGalleryImages(
+      galleryId,
+      Array.from(files),
+      (current, totalFiles, filename) => {
+        setUploadCurrent(current);
+        setUploadTotal(totalFiles);
+        setUploadFilename(filename);
+        setUploadProgress(`Upload ${current}/${totalFiles}: ${filename}`);
+      }
+    );
 
-    const res = await fetch(`/api/admin/galleries/${galleryId}/upload`, {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
     setUploading(false);
-    setUploadProgress("");
+    setUploadFilename("");
 
-    if (!res.ok) {
-      setUploadError(data.error ?? "Upload nije uspeo.");
-      if (fileRef.current) fileRef.current.value = "";
-      return;
-    }
-
-    if (data.uploaded?.length) {
-      const newImages = data.uploaded.map(
-        (u: { id: string; filename: string; storage_path: string }, i: number) => ({
-          id: u.id,
-          gallery_id: galleryId,
-          storage_path: u.storage_path,
-          filename: u.filename,
-          sort_order: images.length + i,
-          created_at: new Date().toISOString(),
-        })
-      );
+    if (uploaded.length) {
+      const newImages = uploaded.map((u, i) => ({
+        id: u.id,
+        gallery_id: galleryId,
+        storage_path: u.storage_path,
+        filename: u.filename,
+        sort_order: images.length + i,
+        created_at: new Date().toISOString(),
+      }));
       setImages((prev) => [...prev, ...newImages]);
       if (!heroImageId && newImages[0]) {
         setHeroImageId(newImages[0].id);
       }
-      setUploadProgress(`Uspešno uploadovano: ${data.uploaded.length} slika`);
+      setUploadProgress(`Uspešno uploadovano: ${uploaded.length} slika`);
       setTimeout(() => setUploadProgress(""), 3000);
-    } else {
+    }
+
+    if (errors.length) {
+      setUploadError(errors.join(" · "));
+    } else if (!uploaded.length) {
       setUploadError("Nijedna slika nije uploadovana.");
     }
 
@@ -195,14 +202,20 @@ export function GalleryAdminDetail({
 
   return (
     <div className="space-y-8">
+      <UploadOverlay
+        open={uploading}
+        current={uploadCurrent}
+        total={uploadTotal}
+        filename={uploadFilename}
+      />
       <div className="relative">
         <GalleryActionsMenu
           className="absolute right-0 top-0"
           onDelete={() => setShowDeleteConfirm(true)}
         />
         <div className="pr-12">
-          <h1 className="font-display text-2xl font-semibold">{galleryTitle}</h1>
-          <p className="mt-1 text-sm text-text-muted/60">@{username ?? slug}</p>
+          <h1 className="font-display text-xl font-semibold break-words sm:text-2xl">{galleryTitle}</h1>
+          <p className="mt-1 text-sm text-text-muted/60 break-all">@{username ?? slug}</p>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <CopyAlbumAccess
@@ -216,7 +229,7 @@ export function GalleryAdminDetail({
         </div>
       </div>
 
-      <section className="glass rounded-2xl p-5">
+      <section className="glass rounded-2xl p-4 sm:p-5">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-accent/80">
           Pristup za klijenta
         </h2>
@@ -233,7 +246,7 @@ export function GalleryAdminDetail({
                 setAccessCodeInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
               }
               maxLength={8}
-              className="mt-2 w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-3 py-2 font-mono text-xl font-bold tracking-[0.2em] text-accent outline-none focus:border-accent/60"
+              className="mt-2 w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-3 py-2 font-mono text-lg font-bold tracking-[0.15em] text-accent outline-none focus:border-accent/60 sm:text-xl sm:tracking-[0.2em]"
             />
             <button
               type="button"
@@ -258,12 +271,12 @@ export function GalleryAdminDetail({
             </p>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             type="button"
             onClick={() => saveAccess()}
             disabled={savingAccess}
-            className="btn-premium rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
+            className="btn-premium w-full rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50 sm:w-auto"
           >
             {savingAccess ? "Čuvanje..." : "Sačuvaj kod i šifru"}
           </button>
@@ -284,7 +297,7 @@ export function GalleryAdminDetail({
         )}
       </section>
 
-      <section className="glass rounded-2xl p-6">
+      <section className="glass rounded-2xl p-4 sm:p-6">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent/80">
           Upload slika
         </h2>
@@ -293,12 +306,10 @@ export function GalleryAdminDetail({
           type="file"
           accept="image/*"
           multiple
+          disabled={uploading}
           onChange={(e) => handleUpload(e.target.files)}
-          className="block w-full text-sm text-text-muted/70 file:mr-4 file:rounded-lg file:border-0 file:bg-accent/15 file:px-4 file:py-2 file:text-sm file:font-medium file:text-accent hover:file:bg-accent/25"
+          className="block w-full text-sm text-text-muted/70 file:mr-4 file:rounded-lg file:border-0 file:bg-accent/15 file:px-4 file:py-2 file:text-sm file:font-medium file:text-accent hover:file:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
         />
-        {uploading && (
-          <p className="mt-2 text-sm text-accent animate-pulse">{uploadProgress}</p>
-        )}
         {uploadProgress && !uploading && (
           <p className="mt-2 text-sm text-accent">{uploadProgress}</p>
         )}
@@ -311,7 +322,7 @@ export function GalleryAdminDetail({
       </section>
 
       {images.length > 0 && (
-        <section className="glass rounded-2xl p-6">
+        <section className="glass rounded-2xl p-4 sm:p-6">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent/80">
             Hero naslovna
           </h2>
@@ -355,7 +366,7 @@ export function GalleryAdminDetail({
         </section>
       )}
 
-      <section className="glass rounded-2xl p-6">
+      <section className="glass rounded-2xl p-4 sm:p-6">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent/80">
           Izbori klijenata ({selections.length})
         </h2>

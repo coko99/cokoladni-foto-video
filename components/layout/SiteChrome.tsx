@@ -23,9 +23,9 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   if (isGalleryApp) {
     return (
-      <div className="min-h-full flex flex-col">
+      <div className="min-h-full flex flex-col overflow-x-hidden">
         <AnimatedBackground />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-x-hidden">{children}</main>
       </div>
     );
   }
