@@ -1,3 +1,5 @@
+import { getSiteUrl, getSupabaseUrl } from "@/lib/env";
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -15,12 +17,11 @@ export function generateSlug(title: string): string {
 }
 
 export function galleryPublicUrl(slug: string): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  return `${base.replace(/\/$/, "")}/g/${slug}`;
+  return `${getSiteUrl()}/g/${slug}`;
 }
 
 export function getImagePublicUrl(storagePath: string): string {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = getSupabaseUrl();
   if (!supabaseUrl) return storagePath;
   return `${supabaseUrl}/storage/v1/object/public/gallery-images/${storagePath}`;
 }

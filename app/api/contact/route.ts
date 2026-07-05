@@ -4,13 +4,17 @@ import {
   validateContactForm,
   type ContactFormData,
 } from "@/lib/contact-form";
+import {
+  getContactFromEmail,
+  getContactToEmail,
+  getResendApiKey,
+} from "@/lib/env";
 
 export const runtime = "nodejs";
 
-const CONTACT_TO = process.env.CONTACT_TO_EMAIL ?? "info@cokoladni.rs";
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const CONTACT_FROM =
-  process.env.CONTACT_FROM_EMAIL ?? "Cokoladni Foto & Video <onboarding@resend.dev>";
+const CONTACT_TO = getContactToEmail();
+const RESEND_API_KEY = getResendApiKey();
+const CONTACT_FROM = getContactFromEmail();
 
 function parseResendError(raw: string): string {
   try {
