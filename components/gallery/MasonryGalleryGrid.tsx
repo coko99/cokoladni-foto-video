@@ -5,6 +5,8 @@ import Image from "next/image";
 import type { GalleryImage, ImageCounts } from "@/lib/gallery/types";
 import { getImagePublicUrl } from "@/lib/gallery/utils";
 import { getTileSize, tileClasses, type TileSize } from "@/lib/gallery/layout";
+import { HeartStack } from "./HeartStack";
+import { GalleryLightbox } from "./GalleryLightbox";
 
 type Props = {
   images: GalleryImage[];
@@ -13,41 +15,18 @@ type Props = {
   onRemove: (id: string) => void;
 };
 
-function HeartStack({ count }: { count: number }) {
-  if (count <= 0) return null;
-  const visible = Math.min(count, 3);
-  return (
-    <div className="relative flex h-6 w-8 items-center">
-      {Array.from({ length: visible }).map((_, i) => (
-        <svg
-          key={i}
-          viewBox="0 0 24 24"
-          className="absolute h-5 w-5 text-accent drop-shadow-[0_0_8px_rgba(101,227,255,0.8)]"
-          style={{ left: i * 6, zIndex: i }}
-          fill="currentColor"
-        >
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-        </svg>
-      ))}
-      {count > 1 && (
-        <span className="absolute -right-1 -top-1 z-10 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-bg-deep">
-          {count}
-        </span>
-      )}
-    </div>
-  );
-}
-
 function MasonryTile({
   image,
   index,
   count,
+  onOpen,
   onAdd,
   onRemove,
 }: {
   image: GalleryImage;
   index: number;
   count: number;
+  onOpen: () => void;
   onAdd: () => void;
   onRemove: () => void;
 }) {
@@ -63,9 +42,9 @@ function MasonryTile({
     >
       <button
         type="button"
-        onClick={onAdd}
+        onClick={onOpen}
         className="absolute inset-0 z-10"
-        aria-label={`Dodaj srce za ${image.filename}`}
+        aria-label={`Pogledaj ${image.filename}`}
       />
       <Image
         src={getImagePublicUrl(image.storage_path)}
@@ -124,18 +103,35 @@ function MasonryTile({
 }
 
 export function MasonryGalleryGrid({ images, counts, onAdd, onRemove }: Props) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
   return (
-    <div className="grid grid-cols-2 auto-rows-[88px] gap-1.5 sm:auto-rows-[100px] sm:gap-2 md:grid-cols-4 md:gap-3 lg:auto-rows-[120px]">
-      {images.map((img, index) => (
-        <MasonryTile
-          key={img.id}
-          image={img}
-          index={index}
-          count={counts[img.id] ?? 0}
-          onAdd={() => onAdd(img.id)}
-          onRemove={() => onRemove(img.id)}
+    <>
+      <div className="grid grid-cols-2 auto-rows-[88px] gap-1.5 sm:auto-rows-[100px] sm:gap-2 md:grid-cols-4 md:gap-3 lg:auto-rows-[120px]">
+        {images.map((img, index) => (
+          <MasonryTile
+            key={img.id}
+            image={img}
+            index={index}
+            count={counts[img.id] ?? 0}
+            onOpen={() => setLightboxIndex(index)}
+            onAdd={() => onAdd(img.id)}
+            onRemove={() => onRemove(img.id)}
+          />
+        ))}
+      </div>
+
+      {lightboxIndex !== null && (
+        <GalleryLightbox
+          images={images}
+          activeIndex={lightboxIndex}
+          counts={counts}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+          onAdd={onAdd}
+          onRemove={onRemove}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }

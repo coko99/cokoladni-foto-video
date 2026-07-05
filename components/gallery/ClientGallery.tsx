@@ -245,7 +245,7 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
             Izaberite fotografije
           </h2>
           <p className="mt-2 text-sm text-text-muted/60">
-            Kliknite srce na svaku sliku koju želite
+            Kliknite sliku za uvećanje, srce za izbor
           </p>
         </div>
 
