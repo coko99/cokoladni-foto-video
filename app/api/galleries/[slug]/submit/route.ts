@@ -1,43 +1,30 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { verifyPin } from "@/lib/gallery/pin";
+import { findGalleryByIdentifier } from "@/lib/gallery/db";
 import { formatSelectionEmail } from "@/lib/gallery/email";
+import { SENDER_RELATIONS } from "@/lib/gallery/relations";
 import type { SubmitSelectionPayload } from "@/lib/gallery/types";
-import {
-  getContactFromEmail,
-  getContactToEmail,
-  getResendApiKey,
-} from "@/lib/env";
+import { getContactToEmail } from "@/lib/env";
+import { sendResendEmail } from "@/lib/resend";
 
-const RESEND_API_KEY = getResendApiKey();
-const CONTACT_FROM = getContactFromEmail();
 const PHOTOGRAPHER_EMAIL = getContactToEmail();
 
-async function sendSelectionEmail(
-  subject: string,
-  text: string,
-  to: string
-): Promise<{ ok: boolean; error?: string }> {
-  if (!RESEND_API_KEY) {
-    return { ok: false, error: "Email servis nije podešen." };
+function dbErrorMessage(error: { message?: string; code?: string }): string {
+  const msg = error.message ?? "";
+
+  if (msg.includes("sender_relation")) {
+    return "Baza nije ažurirana. Pokrenite migration-v2.sql u Supabase SQL Editoru.";
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from: CONTACT_FROM, to: [to], subject, text }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Resend selection error:", res.status, err);
-    return { ok: false, error: "Slanje emaila nije uspelo." };
+  if (msg.includes("duplicate key") || msg.includes("unique constraint")) {
+    return "Baza ne dozvoljava duplikate slika. Pokrenite migration-v2.sql u Supabase SQL Editoru.";
   }
 
-  return { ok: true };
+  if (process.env.NODE_ENV === "development") {
+    return msg || "Nepoznata greška baze.";
+  }
+
+  return "Čuvanje izbora nije uspelo.";
 }
 
 export async function POST(
@@ -47,13 +34,17 @@ export async function POST(
   try {
     const { slug } = await params;
     const body = (await request.json()) as SubmitSelectionPayload;
-    const { clientName, clientEmail, clientPhone, note, imageIds } = body;
+    const { senderRelation, note, imageIds } = body;
 
-    if (!clientName?.trim() || !clientEmail?.trim()) {
+    if (!senderRelation?.trim()) {
       return NextResponse.json(
-        { error: "Ime i email su obavezni." },
+        { error: "Izaberite ko šalje izbor." },
         { status: 400 }
       );
+    }
+
+    if (!SENDER_RELATIONS.includes(senderRelation as (typeof SENDER_RELATIONS)[number])) {
+      return NextResponse.json({ error: "Nevažeća opcija." }, { status: 400 });
     }
 
     if (!imageIds?.length) {
@@ -63,83 +54,114 @@ export async function POST(
       );
     }
 
+    const gallery = await findGalleryByIdentifier(slug);
+    if (!gallery) {
+      return NextResponse.json({ error: "Album nije pronađen." }, { status: 404 });
+    }
+
+    const key = gallery.username ?? gallery.slug;
+    const verifiedCookie = request.headers
+      .get("cookie")
+      ?.split(";")
+      .find((c) => c.trim().startsWith(`gallery_verified_${key}=`));
+
+    if (!verifiedCookie) {
+      return NextResponse.json({ error: "Potreban je pristup albumu." }, { status: 401 });
+    }
+
     const supabase = createAdminClient();
+    const uniqueIds = [...new Set(imageIds)];
 
-    const { data: gallery, error: galleryError } = await supabase
-      .from("galleries")
-      .select("*")
-      .eq("slug", slug)
-      .single();
-
-    if (galleryError || !gallery) {
-      return NextResponse.json({ error: "Galerija nije pronađena." }, { status: 404 });
-    }
-
-    if (gallery.pin_hash) {
-      const pinCookie = request.headers
-        .get("cookie")
-        ?.split(";")
-        .find((c) => c.trim().startsWith(`gallery_pin_${slug}=`));
-
-      if (!pinCookie) {
-        return NextResponse.json({ error: "Potrebna je šifra galerije." }, { status: 401 });
-      }
-    }
-
-    if (gallery.max_selections && imageIds.length > gallery.max_selections) {
-      return NextResponse.json(
-        { error: `Možete izabrati najviše ${gallery.max_selections} slika.` },
-        { status: 400 }
-      );
-    }
-
-    const { data: images, error: imagesError } = await supabase
+    const { data: imageRows, error: imagesError } = await supabase
       .from("gallery_images")
       .select("id, filename")
       .eq("gallery_id", gallery.id)
-      .in("id", imageIds);
+      .in("id", uniqueIds);
 
-    if (imagesError || !images?.length) {
+    if (imagesError || !imageRows?.length) {
       return NextResponse.json({ error: "Izabrane slike nisu validne." }, { status: 400 });
     }
 
-    const { data: selection, error: selectionError } = await supabase
+    const imageMap = new Map(imageRows.map((img) => [img.id, img]));
+    const expandedImages = imageIds
+      .map((id) => imageMap.get(id))
+      .filter((img): img is NonNullable<typeof img> => Boolean(img));
+
+    if (!expandedImages.length) {
+      return NextResponse.json({ error: "Izabrane slike nisu validne." }, { status: 400 });
+    }
+
+    const baseSelection = {
+      gallery_id: gallery.id,
+      client_name: senderRelation.trim(),
+      client_email: gallery.client_email,
+      note: note?.trim() || null,
+    };
+
+    let selectionResult = await supabase
       .from("selections")
       .insert({
-        gallery_id: gallery.id,
-        client_name: clientName.trim(),
-        client_email: clientEmail.trim(),
-        client_phone: clientPhone?.trim() || null,
-        note: note?.trim() || null,
+        ...baseSelection,
+        sender_relation: senderRelation.trim(),
       })
       .select("id")
       .single();
 
+    if (
+      selectionResult.error?.message?.includes("sender_relation") ||
+      selectionResult.error?.code === "PGRST204"
+    ) {
+      selectionResult = await supabase
+        .from("selections")
+        .insert(baseSelection)
+        .select("id")
+        .single();
+    }
+
+    const { data: selection, error: selectionError } = selectionResult;
+
     if (selectionError || !selection) {
-      return NextResponse.json({ error: "Čuvanje izbora nije uspelo." }, { status: 500 });
+      console.error("Selection insert error:", selectionError);
+      return NextResponse.json(
+        { error: dbErrorMessage(selectionError ?? {}) },
+        { status: 500 }
+      );
     }
 
     const { error: linkError } = await supabase.from("selection_images").insert(
-      images.map((img) => ({
+      expandedImages.map((img) => ({
         selection_id: selection.id,
         image_id: img.id,
       }))
     );
 
     if (linkError) {
-      return NextResponse.json({ error: "Čuvanje izbora nije uspelo." }, { status: 500 });
+      console.error("Selection images insert error:", linkError);
+      await supabase.from("selections").delete().eq("id", selection.id);
+      return NextResponse.json(
+        { error: dbErrorMessage(linkError) },
+        { status: 500 }
+      );
     }
 
     const { subject, text } = formatSelectionEmail(
       gallery,
-      { name: clientName, email: clientEmail, phone: clientPhone, note },
-      images
+      { senderRelation, note },
+      expandedImages
     );
 
-    await sendSelectionEmail(subject, text, PHOTOGRAPHER_EMAIL);
+    const emailResult = await sendResendEmail(PHOTOGRAPHER_EMAIL, subject, text);
 
-    return NextResponse.json({ success: true, selectionId: selection.id });
-  } catch {
+    return NextResponse.json({
+      success: true,
+      selectionId: selection.id,
+      totalCount: expandedImages.length,
+      senderRelation,
+      emailSent: emailResult.ok,
+      emailError: emailResult.error ?? null,
+    });
+  } catch (error) {
+    console.error("Submit selection error:", error);
     return NextResponse.json({ error: "Došlo je do greške." }, { status: 500 });
   }
 }

@@ -11,7 +11,8 @@ export function LoginForm({ redirect }: { redirect?: string }) {
   const [tab, setTab] = useState<Tab>("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [galleryCode, setGalleryCode] = useState("");
+  const [albumUsername, setAlbumUsername] = useState("");
+  const [accessCode, setAccessCode] = useState("");
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,30 +43,31 @@ export function LoginForm({ redirect }: { redirect?: string }) {
     setLoading(true);
     setError("");
 
-    const slug = galleryCode.trim().toLowerCase().replace(/^\/g\//, "");
+    const username = albumUsername.trim().toLowerCase().replace(/^\/g\//, "");
 
-    if (!slug) {
-      setError("Unesite kod galerije.");
+    if (!username || !accessCode.trim()) {
+      setError("Unesite username i kod albuma.");
       setLoading(false);
       return;
     }
 
-    if (pin.trim()) {
-      const res = await fetch(`/api/galleries/${slug}/verify-pin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: pin.trim() }),
-      });
+    const res = await fetch(`/api/galleries/${username}/verify-access`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        accessCode: accessCode.trim(),
+        pin: pin.trim() || undefined,
+      }),
+    });
 
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error ?? "Pogrešna šifra.");
-        setLoading(false);
-        return;
-      }
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error ?? "Pristup nije dozvoljen.");
+      setLoading(false);
+      return;
     }
 
-    router.push(`/g/${slug}`);
+    router.push(`/g/${username}`);
   }
 
   return (
@@ -144,30 +146,40 @@ export function LoginForm({ redirect }: { redirect?: string }) {
         <form onSubmit={handleClientAccess} className="glass-strong rounded-2xl p-6 space-y-4">
           <div>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
-              Kod galerije
+              Username albuma
             </label>
             <input
               type="text"
-              value={galleryCode}
-              onChange={(e) => setGalleryCode(e.target.value)}
+              value={albumUsername}
+              onChange={(e) => setAlbumUsername(e.target.value)}
               required
               className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60 focus:shadow-[0_0_20px_rgba(101,227,255,0.15)]"
-              placeholder="npr. svadba-marko-ana-x7k2m"
+              placeholder="marko-ana-svadba"
             />
-            <p className="mt-1.5 text-xs text-text-muted/50">
-              Kod dobijate od fotografa u linku galerije
-            </p>
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
-              Šifra (PIN)
+              Kod albuma
+            </label>
+            <input
+              type="text"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+              required
+              className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-center text-lg font-semibold tracking-[0.3em] outline-none focus:border-accent/60"
+              placeholder="ABC123"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
+              Šifra — ako postoji
             </label>
             <input
               type="password"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60 focus:shadow-[0_0_20px_rgba(101,227,255,0.15)]"
-              placeholder="Ako galerija ima šifru"
+              placeholder="Opciono"
             />
           </div>
           {error && <p className="text-sm text-red-400">{error}</p>}
@@ -176,7 +188,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
             disabled={loading}
             className="btn-premium w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
           >
-            {loading ? "Provera..." : "Otvori galeriju"}
+            {loading ? "Provera..." : "Uđi u album"}
           </button>
         </form>
       )}

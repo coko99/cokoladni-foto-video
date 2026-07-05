@@ -1,26 +1,21 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
+import { findGalleryByIdentifier } from "@/lib/gallery/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientGallery } from "@/components/gallery/ClientGallery";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata(
-  "Galerija | Čokoladni",
-  "Privatna galerija fotografija — izaberite omiljene slike."
+  "Album | Čokoladni",
+  "Privatni album fotografija — izaberite omiljene slike."
 );
 
-async function getGallery(slug: string) {
+async function getGallery(identifier: string) {
   try {
+    const gallery = await findGalleryByIdentifier(identifier);
+    if (!gallery) return null;
+
     const admin = createAdminClient();
-
-    const { data: gallery, error } = await admin
-      .from("galleries")
-      .select("*")
-      .eq("slug", slug)
-      .single();
-
-    if (error || !gallery) return null;
-
     const { data: images } = await admin
       .from("gallery_images")
       .select("*")
@@ -43,15 +38,16 @@ export default async function PublicGalleryPage({
 
   if (!data) notFound();
 
+  const key = data.gallery.username ?? data.gallery.slug;
   const cookieStore = await cookies();
-  const pinCookie = cookieStore.get(`gallery_pin_${slug}`);
-  const needsPin = Boolean(data.gallery.pin_hash) && !pinCookie;
+  const verified = cookieStore.get(`gallery_verified_${key}`);
+  const needsAccess = !verified;
 
   return (
     <ClientGallery
       gallery={data.gallery}
       images={data.images}
-      needsPin={needsPin}
+      needsAccess={needsAccess}
     />
   );
 }

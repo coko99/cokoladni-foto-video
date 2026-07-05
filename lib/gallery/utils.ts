@@ -10,14 +10,23 @@ export function slugify(text: string): string {
     .slice(0, 60);
 }
 
+export function generateAccessCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export function generateSlug(title: string): string {
   const base = slugify(title);
   const suffix = Math.random().toString(36).slice(2, 7);
   return base ? `${base}-${suffix}` : suffix;
 }
 
-export function galleryPublicUrl(slug: string): string {
-  return `${getSiteUrl()}/g/${slug}`;
+export function galleryPublicUrl(usernameOrSlug: string): string {
+  return `${getSiteUrl()}/g/${usernameOrSlug}`;
 }
 
 export function getImagePublicUrl(storagePath: string): string {

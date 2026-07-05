@@ -1,10 +1,16 @@
 export type Gallery = {
   id: string;
   slug: string;
+  username: string | null;
+  access_code: string;
   title: string;
   client_name: string;
   client_email: string;
+  hosts_info: string | null;
+  event_type: string | null;
+  event_date: string | null;
   pin_hash: string | null;
+  pin_plain: string | null;
   max_selections: number | null;
   created_by: string | null;
   created_at: string;
@@ -26,12 +32,14 @@ export type Selection = {
   client_name: string;
   client_email: string;
   client_phone: string | null;
+  sender_relation: string;
   note: string | null;
   created_at: string;
 };
 
 export type SelectionWithImages = Selection & {
   images: GalleryImage[];
+  total_count: number;
 };
 
 export type GalleryWithStats = Gallery & {
@@ -40,17 +48,20 @@ export type GalleryWithStats = Gallery & {
 };
 
 export type SubmitSelectionPayload = {
-  clientName: string;
-  clientEmail: string;
-  clientPhone?: string;
+  senderRelation: string;
   note?: string;
   imageIds: string[];
 };
 
 export type CreateGalleryPayload = {
   title: string;
+  username: string;
   clientName: string;
   clientEmail: string;
+  eventType: string;
+  hostsInfo?: string;
+  eventDate?: string;
   pin?: string;
-  maxSelections?: number;
 };
+
+export type ImageCounts = Record<string, number>;

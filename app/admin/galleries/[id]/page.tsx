@@ -29,7 +29,7 @@ async function getGalleryData(id: string) {
       .from("selections")
       .select("*")
       .eq("gallery_id", id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: true });
 
     const selectionsWithImages: SelectionWithImages[] = await Promise.all(
       (selections ?? []).map(async (sel) => {
@@ -39,11 +39,21 @@ async function getGalleryData(id: string) {
           .eq("selection_id", sel.id);
 
         const imageIds = (links ?? []).map((l) => l.image_id);
-        const { data: selImages } = imageIds.length
-          ? await admin.from("gallery_images").select("*").in("id", imageIds)
+        const uniqueIds = [...new Set(imageIds)];
+        const { data: selImages } = uniqueIds.length
+          ? await admin.from("gallery_images").select("*").in("id", uniqueIds)
           : { data: [] };
 
-        return { ...sel, images: selImages ?? [] };
+        const imageMap = new Map((selImages ?? []).map((img) => [img.id, img]));
+        const orderedImages = imageIds
+          .map((id) => imageMap.get(id))
+          .filter((img): img is NonNullable<typeof img> => Boolean(img));
+
+        return {
+          ...sel,
+          images: orderedImages,
+          total_count: orderedImages.length,
+        };
       })
     );
 
@@ -67,8 +77,12 @@ export default async function GalleryDetailPage({
     <GalleryAdminDetail
       galleryId={data.gallery.id}
       galleryTitle={data.gallery.title}
+      clientName={data.gallery.client_name}
       slug={data.gallery.slug}
-      publicUrl={galleryPublicUrl(data.gallery.slug)}
+      username={data.gallery.username}
+      accessCode={data.gallery.access_code}
+      pinPlain={data.gallery.pin_plain}
+      publicUrl={galleryPublicUrl(data.gallery.username ?? data.gallery.slug)}
       initialImages={data.images}
       initialSelections={data.selections}
     />

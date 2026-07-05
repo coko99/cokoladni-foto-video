@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { GalleryWithStats } from "@/lib/gallery/types";
 import { galleryPublicUrl } from "@/lib/gallery/utils";
+import { EVENT_TYPES } from "@/lib/gallery/event-types";
 
 export function GalleryList({ galleries }: { galleries: GalleryWithStats[] }) {
   if (!galleries.length) {
@@ -30,14 +31,20 @@ export function GalleryList({ galleries }: { galleries: GalleryWithStats[] }) {
         >
           <h3 className="font-semibold text-text-primary truncate">{g.title}</h3>
           <p className="mt-1 text-sm text-text-muted/60 truncate">{g.client_name}</p>
+          {g.event_type && (
+            <p className="mt-1 text-xs text-accent/70">{g.event_type}</p>
+          )}
           <div className="mt-4 flex gap-4 text-xs text-accent/70">
             <span>{g.image_count} slika</span>
             <span>{g.selection_count} izbora</span>
             {g.pin_hash && <span>🔒 PIN</span>}
           </div>
           <p className="mt-2 text-xs text-text-muted/40 truncate">
-            {galleryPublicUrl(g.slug)}
+            {galleryPublicUrl(g.username ?? g.slug)}
           </p>
+          {g.access_code && (
+            <p className="mt-1 text-xs font-mono text-accent/60">Kod: {g.access_code}</p>
+          )}
         </Link>
       ))}
     </div>
@@ -46,10 +53,13 @@ export function GalleryList({ galleries }: { galleries: GalleryWithStats[] }) {
 
 export function CreateGalleryForm() {
   const [title, setTitle] = useState("");
+  const [username, setUsername] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
+  const [eventType, setEventType] = useState(EVENT_TYPES[0]);
+  const [hostsInfo, setHostsInfo] = useState("");
+  const [eventDate, setEventDate] = useState("");
   const [pin, setPin] = useState("");
-  const [maxSelections, setMaxSelections] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -63,10 +73,13 @@ export function CreateGalleryForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title,
+        username,
         clientName,
         clientEmail,
+        eventType,
+        hostsInfo: hostsInfo || undefined,
+        eventDate: eventDate || undefined,
         pin: pin || undefined,
-        maxSelections: maxSelections ? parseInt(maxSelections, 10) : undefined,
       }),
     });
 
@@ -76,6 +89,10 @@ export function CreateGalleryForm() {
       setError(data.error ?? "Greška pri kreiranju.");
       setLoading(false);
       return;
+    }
+
+    if (pin.trim()) {
+      sessionStorage.setItem(`gallery-pin-${data.gallery.id}`, pin.trim());
     }
 
     window.location.href = `/admin/galleries/${data.gallery.id}`;
@@ -94,6 +111,23 @@ export function CreateGalleryForm() {
           className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
           placeholder="Svadba Marko & Ana"
         />
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
+          Tip događaja
+        </label>
+        <select
+          value={eventType}
+          onChange={(e) => setEventType(e.target.value)}
+          required
+          className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
+        >
+          {EVENT_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
@@ -120,26 +154,50 @@ export function CreateGalleryForm() {
       </div>
       <div>
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
-          Šifra (PIN) — opciono
+          Domaćini (prikazuje se na hero)
+        </label>
+        <input
+          value={hostsInfo}
+          onChange={(e) => setHostsInfo(e.target.value)}
+          className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
+          placeholder="Marko & Ana"
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
+          Datum događaja
+        </label>
+        <input
+          type="date"
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+          className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
+          Username albuma
+        </label>
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
+          placeholder="marko-ana-svadba"
+        />
+        <p className="mt-1.5 text-xs text-text-muted/50">
+          Link: /g/username · Kod albuma se automatski generiše
+        </p>
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
+          Šifra albuma — opciono
         </label>
         <input
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
           placeholder="npr. 1234"
-        />
-      </div>
-      <div>
-        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
-          Max broj izbora — opciono
-        </label>
-        <input
-          type="number"
-          value={maxSelections}
-          onChange={(e) => setMaxSelections(e.target.value)}
-          min={1}
-          className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
-          placeholder="npr. 20 za album"
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
