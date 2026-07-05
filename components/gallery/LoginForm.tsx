@@ -11,7 +11,6 @@ export function LoginForm({ redirect }: { redirect?: string }) {
   const [tab, setTab] = useState<Tab>("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [albumUsername, setAlbumUsername] = useState("");
   const [accessCode, setAccessCode] = useState("");
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,31 +42,31 @@ export function LoginForm({ redirect }: { redirect?: string }) {
     setLoading(true);
     setError("");
 
-    const username = albumUsername.trim().toLowerCase().replace(/^\/g\//, "");
-
-    if (!username || !accessCode.trim()) {
-      setError("Unesite username i kod albuma.");
+    if (!accessCode.trim()) {
+      setError("Unesite kod albuma.");
       setLoading(false);
       return;
     }
 
-    const res = await fetch(`/api/galleries/${username}/verify-access`, {
+    const res = await fetch("/api/galleries/verify-access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({
         accessCode: accessCode.trim(),
         pin: pin.trim() || undefined,
       }),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const data = await res.json();
       setError(data.error ?? "Pristup nije dozvoljen.");
       setLoading(false);
       return;
     }
 
-    router.push(`/g/${username}`);
+    router.push(`/g/${data.slug}`);
   }
 
   return (
@@ -144,19 +143,9 @@ export function LoginForm({ redirect }: { redirect?: string }) {
         </form>
       ) : (
         <form onSubmit={handleClientAccess} className="glass-strong rounded-2xl p-6 space-y-4">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
-              Username albuma
-            </label>
-            <input
-              type="text"
-              value={albumUsername}
-              onChange={(e) => setAlbumUsername(e.target.value)}
-              required
-              className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60 focus:shadow-[0_0_20px_rgba(101,227,255,0.15)]"
-              placeholder="marko-ana-svadba"
-            />
-          </div>
+          <p className="text-center text-sm text-text-muted/60">
+            Unesite kod albuma koji ste dobili od fotografa
+          </p>
           <div>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-accent/80">
               Kod albuma

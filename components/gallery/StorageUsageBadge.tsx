@@ -159,7 +159,7 @@ export function StorageUsageCard() {
             </p>
           )}
           <p className="mt-2 text-xs text-text-muted/45">
-            {info.fileCount} slika u albumima · Supabase Free plan: 1 GB
+            {info.fileCount} slika · prikaz kao na Supabase dashboardu
           </p>
         </div>
       </div>

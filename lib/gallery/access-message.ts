@@ -23,7 +23,7 @@ export function formatClientAccessMessage({
     "Hvala vam što koristite Čokoladni Foto & Video!",
     "",
     `Vaš privatni album „${title}" je spreman.`,
-    "Otvorite link, unesite kod (i šifru ako je postavljena), izaberite omiljene fotografije klikom na srce i pošaljite nam izbor.",
+    "Otvorite link ili se prijavite na sajt, unesite kod albuma (i šifru ako je postavljena), izaberite omiljene fotografije klikom na srce i pošaljite nam izbor.",
     "",
     "── Pristup albumu ──",
     "",
@@ -34,10 +34,6 @@ export function formatClientAccessMessage({
     accessCode,
   ];
 
-  if (username) {
-    lines.push("", `👤 Username:`, username);
-  }
-
   if (pin?.trim()) {
     lines.push("", `🔒 Šifra:`, pin.trim());
   } else {
@@ -46,7 +42,7 @@ export function formatClientAccessMessage({
 
   lines.push(
     "",
-    "Kod i šifru unesite prilikom ulaska u album.",
+    "Kod albuma (i šifru ako postoji) unesite prilikom ulaska u album.",
     "",
     "Srdačan pozdrav,",
     "Čokoladni Foto & Video",

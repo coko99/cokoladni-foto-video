@@ -22,3 +22,20 @@ export async function findGalleryByIdentifier(
 
   return byUsername;
 }
+
+export async function findGalleryByAccessCode(
+  accessCode: string
+): Promise<Gallery | null> {
+  const admin = createAdminClient();
+  const code = accessCode.trim().toUpperCase();
+
+  if (!code) return null;
+
+  const { data } = await admin
+    .from("galleries")
+    .select("*")
+    .eq("access_code", code)
+    .maybeSingle();
+
+  return data;
+}

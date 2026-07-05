@@ -6,6 +6,7 @@ import { sanitizeFilename } from "@/lib/gallery/filename";
 type RegisterPayload = {
   filename: string;
   storagePath: string;
+  fileSizeBytes?: number;
 };
 
 export async function POST(
@@ -58,6 +59,11 @@ export async function POST(
     .select("*", { count: "exact", head: true })
     .eq("gallery_id", id);
 
+  const fileSizeBytes =
+    typeof body.fileSizeBytes === "number" && body.fileSizeBytes > 0
+      ? Math.round(body.fileSizeBytes)
+      : null;
+
   const { data: imageRow, error: insertError } = await admin
     .from("gallery_images")
     .insert({
@@ -65,6 +71,7 @@ export async function POST(
       storage_path: storagePath,
       filename,
       sort_order: count ?? 0,
+      ...(fileSizeBytes !== null ? { file_size_bytes: fileSizeBytes } : {}),
     })
     .select("id, filename, storage_path")
     .single();

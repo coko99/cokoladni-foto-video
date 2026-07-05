@@ -24,6 +24,7 @@ export type GalleryImage = {
   storage_path: string;
   filename: string;
   sort_order: number;
+  file_size_bytes: number | null;
   created_at: string;
 };
 

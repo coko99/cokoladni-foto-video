@@ -90,6 +90,7 @@ export async function uploadGalleryImages(
       body: JSON.stringify({
         filename: signData.filename,
         storagePath: signData.storagePath,
+        fileSizeBytes: file.size,
       }),
     });
 
