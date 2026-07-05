@@ -10,6 +10,7 @@ type Props = {
   accessCode: string;
   username?: string | null;
   pin?: string | null;
+  compact?: boolean;
 };
 
 export function CopyAlbumAccess({
@@ -19,6 +20,7 @@ export function CopyAlbumAccess({
   accessCode,
   username,
   pin,
+  compact = false,
 }: Props) {
   const [copied, setCopied] = useState(false);
 
@@ -41,9 +43,17 @@ export function CopyAlbumAccess({
     <button
       type="button"
       onClick={copy}
-      className="btn-premium w-full rounded-xl px-5 py-3 text-sm font-semibold sm:w-auto"
+      className={
+        compact
+          ? "btn-ghost w-full rounded-xl px-3 py-2 text-xs font-semibold"
+          : "btn-premium w-full rounded-xl px-5 py-3 text-sm font-semibold sm:w-auto"
+      }
     >
-      {copied ? "✓ Kopirano — pošalji klijentu!" : "Kopiraj poruku za klijenta"}
+      {copied
+        ? "✓ Kopirano!"
+        : compact
+          ? "Kopiraj poruku"
+          : "Kopiraj poruku za klijenta"}
     </button>
   );
 }

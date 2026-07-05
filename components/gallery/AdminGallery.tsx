@@ -5,9 +5,31 @@ import Link from "next/link";
 import type { GalleryWithStats } from "@/lib/gallery/types";
 import { galleryPublicUrl } from "@/lib/gallery/utils";
 import { EVENT_TYPES } from "@/lib/gallery/event-types";
+import { GalleryActionsMenu } from "./GalleryActionsMenu";
+import { CopyAlbumAccess } from "./CopyAlbumAccess";
 
 export function GalleryList({ galleries }: { galleries: GalleryWithStats[] }) {
-  if (!galleries.length) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [list, setList] = useState(galleries);
+
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    const res = await fetch(`/api/admin/galleries/${id}`, { method: "DELETE" });
+    setDeletingId(null);
+    setConfirmId(null);
+
+    if (res.ok) {
+      sessionStorage.removeItem(`gallery-pin-${id}`);
+      setList((prev) => prev.filter((g) => g.id !== id));
+      return;
+    }
+
+    const data = await res.json();
+    alert(data.error ?? "Brisanje galerije nije uspelo.");
+  }
+
+  if (!list.length) {
     return (
       <div className="glass rounded-2xl p-12 text-center">
         <p className="text-text-muted/60">Još nema galerija.</p>
@@ -22,32 +44,85 @@ export function GalleryList({ galleries }: { galleries: GalleryWithStats[] }) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {galleries.map((g) => (
-        <Link
-          key={g.id}
-          href={`/admin/galleries/${g.id}`}
-          className="glass card-glow rounded-2xl p-5 transition-all hover:border-accent/40"
-        >
-          <h3 className="font-semibold text-text-primary truncate">{g.title}</h3>
-          <p className="mt-1 text-sm text-text-muted/60 truncate">{g.client_name}</p>
-          {g.event_type && (
-            <p className="mt-1 text-xs text-accent/70">{g.event_type}</p>
-          )}
-          <div className="mt-4 flex gap-4 text-xs text-accent/70">
-            <span>{g.image_count} slika</span>
-            <span>{g.selection_count} izbora</span>
-            {g.pin_hash && <span>🔒 PIN</span>}
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((g) => (
+          <div
+            key={g.id}
+            className="glass card-glow relative rounded-2xl p-5 transition-all hover:border-accent/40"
+          >
+            <Link href={`/admin/galleries/${g.id}`} className="block">
+              <h3 className="font-semibold text-text-primary truncate pr-8">{g.title}</h3>
+              <p className="mt-1 text-sm text-text-muted/60 truncate">{g.client_name}</p>
+              {g.event_type && (
+                <p className="mt-1 text-xs text-accent/70">{g.event_type}</p>
+              )}
+              <div className="mt-4 flex gap-4 text-xs text-accent/70">
+                <span>{g.image_count} slika</span>
+                <span>{g.selection_count} izbora</span>
+                {g.pin_hash && <span>🔒 PIN</span>}
+              </div>
+              <p className="mt-2 text-xs text-text-muted/40 truncate">
+                {galleryPublicUrl(g.username ?? g.slug)}
+              </p>
+              {g.access_code && (
+                <p className="mt-1 text-xs font-mono text-accent/60">Kod: {g.access_code}</p>
+              )}
+            </Link>
+            <div className="mt-3">
+              <CopyAlbumAccess
+                compact
+                title={g.title}
+                clientName={g.client_name}
+                publicUrl={galleryPublicUrl(g.username ?? g.slug)}
+                accessCode={g.access_code}
+                username={g.username}
+                pin={g.pin_plain}
+              />
+            </div>
+            <GalleryActionsMenu
+              className="absolute right-3 top-3 z-10"
+              onDelete={() => setConfirmId(g.id)}
+            />
           </div>
-          <p className="mt-2 text-xs text-text-muted/40 truncate">
-            {galleryPublicUrl(g.username ?? g.slug)}
-          </p>
-          {g.access_code && (
-            <p className="mt-1 text-xs font-mono text-accent/60">Kod: {g.access_code}</p>
-          )}
-        </Link>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      {confirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="glass-strong w-full max-w-md rounded-2xl p-6 space-y-4">
+            <h3 className="font-display text-lg font-semibold text-red-300">
+              Obrisati galeriju?
+            </h3>
+            <p className="text-sm text-text-muted/70">
+              Da li ste sigurni da želite da obrišete{" "}
+              <span className="font-semibold text-text-primary">
+                „{list.find((g) => g.id === confirmId)?.title}”
+              </span>
+              ? Sve slike i izbori biće trajno uklonjeni.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmId(null)}
+                disabled={deletingId === confirmId}
+                className="btn-ghost flex-1 rounded-xl py-2.5 text-sm disabled:opacity-50"
+              >
+                Otkaži
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(confirmId)}
+                disabled={deletingId === confirmId}
+                className="flex-1 rounded-xl border border-red-500/50 bg-red-500/20 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/30 disabled:opacity-50"
+              >
+                {deletingId === confirmId ? "Brisanje..." : "Da, obriši"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -56,21 +131,19 @@ export function CreateGalleryForm() {
   const [username, setUsername] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [eventType, setEventType] = useState<string>("Svadba");
   const [hostsInfo, setHostsInfo] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  function handleEventTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    setEventType(e.target.value);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const eventType = String(formData.get("eventType") ?? EVENT_TYPES[0] ?? "Svadba");
 
     const res = await fetch("/api/admin/galleries", {
       method: "POST",
@@ -121,8 +194,8 @@ export function CreateGalleryForm() {
           Tip događaja
         </label>
         <select
-          value={eventType}
-          onChange={handleEventTypeChange}
+          name="eventType"
+          defaultValue={EVENT_TYPES[0]}
           required
           className="w-full rounded-xl border border-accent/25 bg-bg-deep/60 px-4 py-3 text-sm outline-none focus:border-accent/60"
         >

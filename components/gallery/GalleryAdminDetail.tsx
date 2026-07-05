@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import type { GalleryImage, SelectionWithImages } from "@/lib/gallery/types";
 import { CopyAlbumAccess } from "./CopyAlbumAccess";
 import { AdminImageSorter } from "./AdminImageSorter";
+import { GalleryActionsMenu } from "./GalleryActionsMenu";
 import { groupImagesByFilename } from "@/lib/gallery/email";
 import { getGalleryCoverImage } from "@/lib/gallery/cover";
 import { getImagePublicUrl } from "@/lib/gallery/utils";
@@ -50,6 +51,8 @@ export function GalleryAdminDetail({
   const [uploadError, setUploadError] = useState("");
   const [displayPin, setDisplayPin] = useState(pinPlain);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingGallery, setDeletingGallery] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -170,16 +173,38 @@ export function GalleryAdminDetail({
     }
   }
 
+  async function handleDeleteGallery() {
+    setDeletingGallery(true);
+
+    const res = await fetch(`/api/admin/galleries/${galleryId}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      sessionStorage.removeItem(`gallery-pin-${galleryId}`);
+      window.location.href = "/admin";
+      return;
+    }
+
+    const data = await res.json();
+    setDeletingGallery(false);
+    alert(data.error ?? "Brisanje galerije nije uspelo.");
+  }
+
   const heroImage = getGalleryCoverImage({ hero_image_id: heroImageId }, images);
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+      <div className="relative">
+        <GalleryActionsMenu
+          className="absolute right-0 top-0"
+          onDelete={() => setShowDeleteConfirm(true)}
+        />
+        <div className="pr-12">
           <h1 className="font-display text-2xl font-semibold">{galleryTitle}</h1>
           <p className="mt-1 text-sm text-text-muted/60">@{username ?? slug}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <CopyAlbumAccess
             title={galleryTitle}
             clientName={clientName}
@@ -376,6 +401,41 @@ export function GalleryAdminDetail({
           </div>
         )}
       </section>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="glass-strong w-full max-w-md rounded-2xl p-6 space-y-4">
+            <h3 className="font-display text-lg font-semibold text-red-300">
+              Obrisati galeriju?
+            </h3>
+            <p className="text-sm text-text-muted/70">
+              Da li ste sigurni da želite da obrišete{" "}
+              <span className="font-semibold text-text-primary">„{galleryTitle}”</span>?
+            </p>
+            <p className="text-xs text-text-muted/50">
+              Biće uklonjeno {images.length} slika i {selections.length} izbora klijenata.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deletingGallery}
+                className="btn-ghost flex-1 rounded-xl py-2.5 text-sm disabled:opacity-50"
+              >
+                Otkaži
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteGallery}
+                disabled={deletingGallery}
+                className="flex-1 rounded-xl border border-red-500/50 bg-red-500/20 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/30 disabled:opacity-50"
+              >
+                {deletingGallery ? "Brisanje..." : "Da, obriši"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
