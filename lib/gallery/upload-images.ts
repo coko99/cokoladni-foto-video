@@ -6,6 +6,7 @@ export type UploadedImageRow = {
   id: string;
   filename: string;
   storage_path: string;
+  file_size_bytes: number | null;
 };
 
 type UploadResult = {

@@ -140,6 +140,7 @@ export function GalleryAdminDetail({
         storage_path: u.storage_path,
         filename: u.filename,
         sort_order: images.length + i,
+        file_size_bytes: u.file_size_bytes,
         created_at: new Date().toISOString(),
       }));
       setImages((prev) => [...prev, ...newImages]);

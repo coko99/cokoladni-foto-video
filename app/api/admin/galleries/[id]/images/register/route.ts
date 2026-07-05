@@ -73,7 +73,7 @@ export async function POST(
       sort_order: count ?? 0,
       ...(fileSizeBytes !== null ? { file_size_bytes: fileSizeBytes } : {}),
     })
-    .select("id, filename, storage_path")
+    .select("id, filename, storage_path, file_size_bytes")
     .single();
 
   if (insertError) {
