@@ -3,7 +3,7 @@ import { getImagePublicUrl } from "@/lib/gallery/utils";
 
 const HEAD_BATCH = 20;
 
-async function sumFromImageHeadRequests(): Promise<{ total: number; fileCount: number }> {
+async function sumFromImageHeadRequests(): Promise<{ usedBytes: number; fileCount: number }> {
   const admin = createAdminClient();
   const { data: images, error } = await admin
     .from("gallery_images")
@@ -15,10 +15,10 @@ async function sumFromImageHeadRequests(): Promise<{ total: number; fileCount: n
 
   const paths = [...new Set((images ?? []).map((row) => row.storage_path).filter(Boolean))];
   if (!paths.length) {
-    return { total: 0, fileCount: 0 };
+    return { usedBytes: 0, fileCount: 0 };
   }
 
-  let total = 0;
+  let usedBytes = 0;
 
   for (let i = 0; i < paths.length; i += HEAD_BATCH) {
     const batch = paths.slice(i, i + HEAD_BATCH);
@@ -37,15 +37,15 @@ async function sumFromImageHeadRequests(): Promise<{ total: number; fileCount: n
         }
       })
     );
-    total += sizes.reduce((sum, n) => sum + n, 0);
+    usedBytes += sizes.reduce((sum, n) => sum + n, 0);
   }
 
-  return { total, fileCount: paths.length };
+  return { usedBytes, fileCount: paths.length };
 }
 
 export async function getGalleryStorageUsageBytes(): Promise<number> {
-  const { total } = await sumFromImageHeadRequests();
-  return total;
+  const { usedBytes } = await sumFromImageHeadRequests();
+  return usedBytes;
 }
 
 export async function getGalleryStorageSummary(): Promise<{ usedBytes: number; fileCount: number }> {
