@@ -392,3 +392,42 @@ select {
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   animation: upload-ring-spin 1s linear infinite;
 }
+
+@keyframes storage-critical-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes storage-ring-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(248, 113, 113, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(248, 113, 113, 1));
+  }
+}
+
+.storage-ring-stroke-critical {
+  animation: storage-ring-glow 1.1s ease-in-out infinite;
+}
+
+.storage-percent-critical {
+  animation: storage-critical-blink 1.1s ease-in-out infinite;
+}
+
+.storage-ring-wrap-critical {
+  animation: storage-ring-glow 1.1s ease-in-out infinite;
+}
+
+.storage-card-critical {
+  border-color: rgba(248, 113, 113, 0.35);
+  box-shadow:
+    0 0 24px rgba(248, 113, 113, 0.12),
+    inset 0 0 20px rgba(248, 113, 113, 0.04);
+}

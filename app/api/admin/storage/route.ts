@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
-  formatStorageSize,
-  getGalleryStorageUsageBytes,
+  buildStorageStats,
+  getGalleryStorageSummary,
 } from "@/lib/gallery/storage-usage";
-import { getStorageQuotaBytes } from "@/lib/env";
+import { getStorageQuotaGb } from "@/lib/env";
 
 export async function GET() {
   const supabase = await createClient();
@@ -17,20 +17,10 @@ export async function GET() {
   }
 
   try {
-    const usedBytes = await getGalleryStorageUsageBytes();
-    const quotaBytes = getStorageQuotaBytes();
-    const freeBytes = Math.max(quotaBytes - usedBytes, 0);
-    const usedPercent = quotaBytes > 0 ? Math.min((usedBytes / quotaBytes) * 100, 100) : 0;
+    const { usedBytes, fileCount } = await getGalleryStorageSummary();
+    const quotaGb = getStorageQuotaGb();
 
-    return NextResponse.json({
-      usedBytes,
-      quotaBytes,
-      freeBytes,
-      usedPercent,
-      usedLabel: formatStorageSize(usedBytes),
-      quotaLabel: formatStorageSize(quotaBytes),
-      freeLabel: formatStorageSize(freeBytes),
-    });
+    return NextResponse.json(buildStorageStats(usedBytes, quotaGb, fileCount));
   } catch (err) {
     const message = err instanceof Error ? err.message : "Provera prostora nije uspela.";
     return NextResponse.json({ error: message }, { status: 500 });

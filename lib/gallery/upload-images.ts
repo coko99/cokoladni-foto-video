@@ -20,7 +20,7 @@ async function parseErrorResponse(res: Response): Promise<string> {
     return data.error ?? text;
   } catch {
     if (res.status === 413) {
-      return "Fajl je prevelik za server. Koristite direktan upload.";
+      return "Fajl je prevelik za server.";
     }
     return text || `Greška ${res.status}`;
   }
@@ -46,13 +46,34 @@ export async function uploadGalleryImages(
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const filename = sanitizeFilename(file.name);
-    const storagePath = `${galleryId}/${filename}`;
 
     onProgress?.(i + 1, files.length, filename);
 
+    const signRes = await fetch(`/api/admin/galleries/${galleryId}/images/signed-url`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type || "image/jpeg",
+      }),
+    });
+
+    if (!signRes.ok) {
+      errors.push(`${filename}: ${await parseErrorResponse(signRes)}`);
+      continue;
+    }
+
+    const signData = (await signRes.json()) as {
+      storagePath: string;
+      filename: string;
+      signedUrl: string;
+      token: string;
+    };
+
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(storagePath, file, {
+      .uploadToSignedUrl(signData.storagePath, signData.token, file, {
         contentType: file.type || "image/jpeg",
         upsert: true,
       });
@@ -65,7 +86,11 @@ export async function uploadGalleryImages(
     const res = await fetch(`/api/admin/galleries/${galleryId}/images/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename, storagePath }),
+      credentials: "include",
+      body: JSON.stringify({
+        filename: signData.filename,
+        storagePath: signData.storagePath,
+      }),
     });
 
     if (!res.ok) {

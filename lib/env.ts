@@ -32,6 +32,10 @@ export function getSiteUrl() {
     return trimTrailingSlash(configured);
   }
 
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return trimTrailingSlash(window.location.origin);
+  }
+
   const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
   if (production) {
     return trimTrailingSlash(
@@ -62,11 +66,13 @@ export function getContactFromEmail() {
   );
 }
 
-/** Supabase Storage kvota projekta u bajtovima (podrazumevano 1 GB). */
+/** Supabase Storage kvota projekta u GB (podrazumevano 1). Postavi na Vercelu prema planu. */
+export function getStorageQuotaGb() {
+  const raw = process.env.STORAGE_QUOTA_GB?.trim() ?? "1";
+  const gb = Number(raw);
+  return Number.isFinite(gb) && gb > 0 ? gb : 1;
+}
+
 export function getStorageQuotaBytes() {
-  const gb = Number(process.env.STORAGE_QUOTA_GB ?? "1");
-  if (!Number.isFinite(gb) || gb <= 0) {
-    return 1024 * 1024 * 1024;
-  }
-  return Math.round(gb * 1024 * 1024 * 1024);
+  return Math.round(getStorageQuotaGb() * 1024 * 1024 * 1024);
 }

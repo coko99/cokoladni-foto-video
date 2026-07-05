@@ -9,6 +9,7 @@ import { groupImagesByFilename } from "@/lib/gallery/email";
 import { getGalleryCoverImage } from "@/lib/gallery/cover";
 import { getImagePublicUrl } from "@/lib/gallery/utils";
 import { uploadGalleryImages } from "@/lib/gallery/upload-images";
+import { refreshStorageUsage } from "./StorageUsageBadge";
 import { UploadOverlay } from "./UploadOverlay";
 import Image from "next/image";
 
@@ -56,6 +57,8 @@ export function GalleryAdminDetail({
   const [uploadError, setUploadError] = useState("");
   const [displayPin, setDisplayPin] = useState(pinPlain);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingGallery, setDeletingGallery] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -154,10 +157,67 @@ export function GalleryAdminDetail({
     }
 
     if (fileRef.current) fileRef.current.value = "";
+    refreshStorageUsage();
+  }
+
+  function toggleSelect(imageId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(imageId)) next.delete(imageId);
+      else next.add(imageId);
+      return next;
+    });
+  }
+
+  function selectAllImages() {
+    setSelectedIds(new Set(images.map((img) => img.id)));
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+
+  async function removeImagesFromState(deletedIds: string[]) {
+    const deletedSet = new Set(deletedIds);
+    setImages((prev) => {
+      const next = prev.filter((img) => !deletedSet.has(img.id));
+      if (heroImageId && deletedSet.has(heroImageId)) {
+        setHeroImageId(next[0]?.id ?? null);
+      }
+      return next;
+    });
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      deletedIds.forEach((id) => next.delete(id));
+      return next;
+    });
+    refreshStorageUsage();
+  }
+
+  async function bulkDeleteImages(imageIds: string[]) {
+    if (!imageIds.length) return;
+    setBulkDeleting(true);
+
+    const res = await fetch(`/api/admin/galleries/${galleryId}/images/bulk-delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageIds }),
+    });
+
+    setBulkDeleting(false);
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error ?? "Brisanje slika nije uspelo.");
+      return;
+    }
+
+    const data = (await res.json()) as { deletedIds: string[]; deletedCount: number };
+    await removeImagesFromState(data.deletedIds);
   }
 
   async function handleDeleteImage(imageId: string) {
-    if (!confirm("Obrisati ovu sliku?")) return;
+    if (!confirm("Obrisati ovu sliku iz albuma i osloboditi prostor na disku?")) return;
     setDeletingId(imageId);
 
     const res = await fetch(`/api/admin/galleries/${galleryId}/images/${imageId}`, {
@@ -167,17 +227,34 @@ export function GalleryAdminDetail({
     setDeletingId(null);
 
     if (res.ok) {
-      setImages((prev) => {
-        const next = prev.filter((img) => img.id !== imageId);
-        if (heroImageId === imageId) {
-          setHeroImageId(next[0]?.id ?? null);
-        }
-        return next;
-      });
+      await removeImagesFromState([imageId]);
     } else {
       const data = await res.json();
       alert(data.error ?? "Brisanje nije uspelo.");
     }
+  }
+
+  async function handleDeleteSelected() {
+    const ids = [...selectedIds];
+    if (
+      !confirm(
+        `Obrisati ${ids.length} izabranih slika iz baze i storage-a?\n\nOvo oslobađa prostor na disku.`
+      )
+    ) {
+      return;
+    }
+    await bulkDeleteImages(ids);
+  }
+
+  async function handleDeleteAllImages() {
+    if (
+      !confirm(
+        `Obrisati SVE slike (${images.length}) iz ovog albuma?\n\nFajlovi se trajno brišu sa diska i oslobađa se memorija.`
+      )
+    ) {
+      return;
+    }
+    await bulkDeleteImages(images.map((img) => img.id));
   }
 
   async function handleDeleteGallery() {
@@ -351,13 +428,44 @@ export function GalleryAdminDetail({
 
       {images.length > 0 && (
         <section>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent/80">
-            Slike — izaberi hero i prevuci za redosled
-          </h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-accent/80">
+              Slike — izaberi, obriši ili podesi redosled
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  onClick={handleDeleteSelected}
+                  disabled={bulkDeleting}
+                  className="rounded-xl border border-red-500/50 bg-red-500/15 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/25 disabled:opacity-50"
+                >
+                  {bulkDeleting
+                    ? "Brisanje..."
+                    : `Obriši izabrane (${selectedIds.size})`}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleDeleteAllImages}
+                disabled={bulkDeleting || images.length === 0}
+                className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300/90 transition hover:bg-red-500/20 disabled:opacity-50"
+              >
+                Obriši sve slike
+              </button>
+            </div>
+          </div>
+          <p className="mb-3 text-xs text-text-muted/50">
+            Brisanje uklanja sliku iz baze i sa diska — oslobađa prostor odmah.
+          </p>
           <AdminImageSorter
             galleryId={galleryId}
             images={images}
             heroImageId={heroImageId}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
+            onSelectAll={selectAllImages}
+            onClearSelection={clearSelection}
             onReorder={setImages}
             onSetHero={setHeroImageId}
             onDelete={handleDeleteImage}
