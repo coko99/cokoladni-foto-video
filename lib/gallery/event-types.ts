@@ -1,4 +1,4 @@
-export const EVENT_TYPES = [
+export const EVENT_TYPES: string[] = [
   "Svadba",
   "Krštenje",
   "Rođendan",
@@ -7,10 +7,8 @@ export const EVENT_TYPES = [
   "Porodično snimanje",
   "Studio / portret",
   "Drugo",
-] as const;
+];
 
-export type EventType = (typeof EVENT_TYPES)[number];
-
-export function isEventType(value: string): value is EventType {
-  return (EVENT_TYPES as readonly string[]).includes(value);
+export function isEventType(value: string): boolean {
+  return EVENT_TYPES.includes(value);
 }
