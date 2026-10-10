@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { GalleryImage, ImageCounts } from "@/lib/gallery/types";
-import { getImagePublicUrl } from "@/lib/gallery/utils";
+import { getImagePublicUrl, preloadImageUrl } from "@/lib/gallery/utils";
 import { HeartStack } from "./HeartStack";
 
 type Props = {
@@ -29,14 +29,22 @@ export function GalleryLightbox({
   const count = image ? (counts[image.id] ?? 0) : 0;
   const hasPrev = activeIndex > 0;
   const hasNext = activeIndex < images.length - 1;
+  const [loaded, setLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const imageUrl = image ? getImagePublicUrl(image.storage_path) : "";
 
   const goPrev = useCallback(() => {
-    if (hasPrev) onNavigate(activeIndex - 1);
-  }, [activeIndex, hasPrev, onNavigate]);
+    if (activeIndex > 0) onNavigate(activeIndex - 1);
+  }, [activeIndex, onNavigate]);
 
   const goNext = useCallback(() => {
-    if (hasNext) onNavigate(activeIndex + 1);
-  }, [activeIndex, hasNext, onNavigate]);
+    if (activeIndex < images.length - 1) onNavigate(activeIndex + 1);
+  }, [activeIndex, images.length, onNavigate]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
@@ -45,6 +53,16 @@ export function GalleryLightbox({
       document.body.style.overflow = prevOverflow;
     };
   }, []);
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [imageUrl]);
+
+  useEffect(() => {
+    if (!image) return;
+    if (hasPrev) preloadImageUrl(getImagePublicUrl(images[activeIndex - 1].storage_path));
+    if (hasNext) preloadImageUrl(getImagePublicUrl(images[activeIndex + 1].storage_path));
+  }, [activeIndex, hasNext, hasPrev, image, images]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -57,11 +75,11 @@ export function GalleryLightbox({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [goNext, goPrev, onClose]);
 
-  if (!image) return null;
+  if (!image || !mounted) return null;
 
-  return (
+  const content = (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-black/92 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex flex-col bg-[#050508]/98"
       role="dialog"
       aria-modal="true"
       aria-label={`Pregled: ${image.filename}`}
@@ -76,7 +94,7 @@ export function GalleryLightbox({
         <button
           type="button"
           onClick={onClose}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-xl text-white transition hover:bg-white/20"
+          className="flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full bg-white/10 text-xl text-white hover:bg-white/20"
           aria-label="Zatvori"
         >
           ×
@@ -88,7 +106,7 @@ export function GalleryLightbox({
           <button
             type="button"
             onClick={goPrev}
-            className="absolute left-1 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-2xl text-white backdrop-blur-sm transition hover:bg-black/75 sm:left-3"
+            className="absolute left-1 z-20 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-black/70 text-2xl text-white hover:bg-black/85 sm:left-3"
             aria-label="Prethodna slika"
           >
             ‹
@@ -96,24 +114,34 @@ export function GalleryLightbox({
         )}
 
         <div
-          className={`relative h-full w-full max-h-[calc(100vh-10rem)] max-w-5xl overflow-hidden rounded-2xl border transition-all duration-300 ${
+          className={`relative flex h-[min(72vh,calc(100svh-8rem))] w-full max-w-5xl items-center justify-center overflow-hidden rounded-2xl border ${
             count > 0
-              ? "border-accent/60 shadow-[0_0_40px_rgba(101,227,255,0.35)]"
+              ? "border-accent/60 shadow-[0_0_32px_rgba(101,227,255,0.3)]"
               : "border-white/10"
           }`}
         >
-          <Image
-            src={getImagePublicUrl(image.storage_path)}
+          {!loaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
+            </div>
+          )}
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={imageUrl}
+            src={imageUrl}
             alt={image.filename}
-            fill
-            sizes="100vw"
-            className="object-contain"
-            priority
+            decoding="async"
+            fetchPriority="high"
+            onLoad={() => setLoaded(true)}
+            className={`max-h-full max-w-full object-contain transition-opacity duration-200 ${
+              loaded ? "opacity-100" : "opacity-0"
+            }`}
           />
 
           {count > 0 && <div className="pointer-events-none absolute inset-0 bg-accent/10" />}
 
-          <div className="absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
+          <div className="absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1.5">
             <HeartStack count={count} />
           </div>
 
@@ -121,7 +149,7 @@ export function GalleryLightbox({
             <button
               type="button"
               onClick={() => onRemove(image.id)}
-              className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-xl font-bold text-white backdrop-blur-sm transition hover:bg-red-500/80"
+              className="absolute right-3 top-3 z-20 flex h-10 w-10 touch-manipulation items-center justify-center rounded-full bg-black/70 text-xl font-bold text-white hover:bg-red-500/80"
               aria-label="Smanji broj"
             >
               −
@@ -131,10 +159,10 @@ export function GalleryLightbox({
           <button
             type="button"
             onClick={() => onAdd(image.id)}
-            className={`absolute bottom-3 right-3 z-20 flex h-12 w-12 items-center justify-center rounded-full transition-all ${
+            className={`absolute bottom-3 right-3 z-20 flex h-12 w-12 touch-manipulation items-center justify-center rounded-full ${
               count > 0
                 ? "bg-accent text-bg-deep shadow-[0_0_20px_rgba(101,227,255,0.55)]"
-                : "bg-black/55 text-white/90 hover:bg-black/75"
+                : "bg-black/70 text-white/90 hover:bg-black/85"
             }`}
             aria-label="Dodaj srce"
           >
@@ -148,7 +176,7 @@ export function GalleryLightbox({
           <button
             type="button"
             onClick={goNext}
-            className="absolute right-1 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-2xl text-white backdrop-blur-sm transition hover:bg-black/75 sm:right-3"
+            className="absolute right-1 z-20 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-black/70 text-2xl text-white hover:bg-black/85 sm:right-3"
             aria-label="Sledeća slika"
           >
             ›
@@ -157,4 +185,6 @@ export function GalleryLightbox({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

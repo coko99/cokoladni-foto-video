@@ -13,7 +13,8 @@ function isGalleryAppRoute(pathname: string): boolean {
   return (
     pathname === "/login" ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/g/")
+    pathname.startsWith("/g/") ||
+    pathname.startsWith("/poze")
   );
 }
 

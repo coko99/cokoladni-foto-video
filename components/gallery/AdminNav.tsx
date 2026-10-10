@@ -30,6 +30,12 @@ export function AdminNav() {
             Galerije
           </Link>
           <Link
+            href="/admin/poze"
+            className="hidden text-sm text-text-muted/70 transition-colors hover:text-accent sm:inline"
+          >
+            Poze
+          </Link>
+          <Link
             href="/admin/galleries/new"
             className="rounded-lg bg-accent/10 px-2.5 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/20 sm:bg-transparent sm:px-0 sm:py-0 sm:text-sm sm:text-text-muted/70 sm:hover:text-accent"
           >

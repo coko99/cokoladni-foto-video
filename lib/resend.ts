@@ -56,3 +56,38 @@ export async function sendResendEmail(
 
   return { ok: true };
 }
+
+export async function sendResendEmailHtml(
+  to: string,
+  subject: string,
+  text: string,
+  html: string
+): Promise<{ ok: boolean; error?: string }> {
+  const apiKey = getResendApiKey();
+  if (!apiKey) {
+    return { ok: false, error: "Email servis nije podešen (RESEND_API_KEY)." };
+  }
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: getContactFromEmail(),
+      to: [to],
+      subject,
+      text,
+      html,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error("Resend error:", res.status, err);
+    return { ok: false, error: parseResendError(err) };
+  }
+
+  return { ok: true };
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/env";
 
 type Tab = "admin" | "client";
 
@@ -21,20 +21,32 @@ export function LoginForm({ redirect }: { redirect?: string }) {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (authError) {
-      setError("Pogrešan email ili lozinka.");
+    if (!getSupabaseUrl() || !getSupabaseAnonKey()) {
+      setError(
+        "Supabase ključevi nisu učitani. Restartuj dev server i proveri .env.local (SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)."
+      );
       setLoading(false);
       return;
     }
 
-    router.push(redirect ?? "/admin");
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = (await res.json()) as { error?: string };
+
+    if (!res.ok) {
+      setError(data.error ?? "Pogrešan email ili lozinka.");
+      setLoading(false);
+      return;
+    }
+
+    const target = redirect ?? "/admin";
     router.refresh();
+    window.location.assign(target);
   }
 
   async function handleClientAccess(e: React.FormEvent) {

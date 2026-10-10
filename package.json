@@ -6,7 +6,23 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:vercel-email": "node scripts/sync-vercel-email-env.mjs",
+    "sync:vercel-email:deploy": "node scripts/sync-vercel-email-env.mjs --redeploy",
+    "setup:supabase": "node scripts/setup-supabase-project.mjs",
+    "db:migrate": "node scripts/apply-supabase-migrations.mjs",
+    "db:fix-poze-encoding": "node scripts/fix-pose-category-names.mjs",
+    "db:seed-poze-categories": "node scripts/seed-poze-categories.mjs",
+    "import:compress-poses": "node scripts/import-compress-poses.mjs",
+    "poze:sort-compress": "node scripts/sort-compress-poses.mjs",
+    "poze:reimport-compress": "node scripts/reimport-compress-poses.mjs",
+    "poze:generate-images": "node scripts/generate-poze-images.mjs",
+    "poze:move-generated": "node scripts/move-gen-poze-to-compress.mjs",
+    "poze:dedupe-gen-files": "node scripts/dedupe-gen-poze-files.mjs",
+    "poze:gen-status": "node scripts/poze-gen-status.mjs",
+    "poze:audit-solo": "node scripts/audit-poze-categories.mjs",
+    "poze:fix-solo-mixups": "node scripts/fix-solo-category-mixups.mjs --apply",
+    "db:merge-sql": "node scripts/merge-sql-utf8.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -25,6 +41,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "pg": "^8.23.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { Gallery, GalleryImage, ImageCounts } from "@/lib/gallery/types";
 import { MasonryGalleryGrid } from "./MasonryGalleryGrid";
 import { AlbumHero } from "./AlbumHero";
@@ -72,11 +72,11 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
     setSuccessMsg("");
   }
 
-  function addHeart(id: string) {
+  const addHeart = useCallback((id: string) => {
     setCounts((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
-  }
+  }, []);
 
-  function removeHeart(id: string) {
+  const removeHeart = useCallback((id: string) => {
     setCounts((prev) => {
       const current = prev[id] ?? 0;
       if (current <= 1) {
@@ -86,7 +86,7 @@ export function ClientGallery({ gallery, images, needsAccess }: Props) {
       }
       return { ...prev, [id]: current - 1 };
     });
-  }
+  }, []);
 
   function openSubmitForm() {
     setShowForm(true);

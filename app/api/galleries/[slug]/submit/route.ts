@@ -7,7 +7,7 @@ import type { SubmitSelectionPayload } from "@/lib/gallery/types";
 import { getContactToEmail } from "@/lib/env";
 import { sendResendEmail } from "@/lib/resend";
 
-const PHOTOGRAPHER_EMAIL = getContactToEmail();
+export const runtime = "nodejs";
 
 function dbErrorMessage(error: { message?: string; code?: string }): string {
   const msg = error.message ?? "";
@@ -150,7 +150,25 @@ export async function POST(
       expandedImages
     );
 
-    const emailResult = await sendResendEmail(PHOTOGRAPHER_EMAIL, subject, text);
+    const photographerEmail = getContactToEmail();
+    const emailResult = await sendResendEmail(photographerEmail, subject, text);
+
+    if (emailResult.ok) {
+      console.info(
+        "Gallery selection email sent:",
+        gallery.title,
+        "→",
+        photographerEmail
+      );
+    } else {
+      console.error(
+        "Gallery selection email failed:",
+        gallery.title,
+        "→",
+        photographerEmail,
+        emailResult.error
+      );
+    }
 
     return NextResponse.json({
       success: true,

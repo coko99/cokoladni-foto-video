@@ -66,6 +66,18 @@ export function getContactFromEmail() {
   );
 }
 
+export function getWeddingPosesNotifyEmail() {
+  return (
+    process.env.WEDDING_POSES_NOTIFY_EMAIL?.trim() ||
+    getContactToEmail()
+  );
+}
+
+/** PIN za pristup /poze (podrazumevano 112233). Postavi POZE_ACCESS_PIN u .env.local */
+export function getPozeAccessPin() {
+  return process.env.POZE_ACCESS_PIN?.trim() || "112233";
+}
+
 /** Supabase Storage kvota projekta u GB (podrazumevano 1). Postavi na Vercelu prema planu. */
 export function getStorageQuotaGb() {
   const raw = process.env.STORAGE_QUOTA_GB?.trim() ?? "1";

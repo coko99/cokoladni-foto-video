@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import Image from "next/image";
 import type { GalleryImage, ImageCounts } from "@/lib/gallery/types";
-import { getImagePublicUrl } from "@/lib/gallery/utils";
+import { getImageThumbnailUrl } from "@/lib/gallery/utils";
 import { getTileSize, tileClasses, type TileSize } from "@/lib/gallery/layout";
 import { HeartStack } from "./HeartStack";
 import { GalleryLightbox } from "./GalleryLightbox";
@@ -15,26 +15,28 @@ type Props = {
   onRemove: (id: string) => void;
 };
 
-function MasonryTile({
+type TileProps = {
+  image: GalleryImage;
+  index: number;
+  count: number;
+  onOpen: (index: number) => void;
+  onAdd: (id: string) => void;
+  onRemove: (id: string) => void;
+};
+
+const MasonryTile = memo(function MasonryTile({
   image,
   index,
   count,
   onOpen,
   onAdd,
   onRemove,
-}: {
-  image: GalleryImage;
-  index: number;
-  count: number;
-  onOpen: () => void;
-  onAdd: () => void;
-  onRemove: () => void;
-}) {
+}: TileProps) {
   const [tileSize, setTileSize] = useState<TileSize>(getTileSize(index));
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${tileClasses[tileSize]} ${
+      className={`group relative overflow-hidden rounded-2xl border [content-visibility:auto] [contain-intrinsic-size:200px] ${tileClasses[tileSize]} ${
         count > 0
           ? "border-accent/60 shadow-[0_0_28px_rgba(101,227,255,0.3)]"
           : "border-accent/10 hover:border-accent/35"
@@ -42,28 +44,29 @@ function MasonryTile({
     >
       <button
         type="button"
-        onClick={onOpen}
-        className="absolute inset-0 z-10"
+        onClick={() => onOpen(index)}
+        className="absolute inset-0 z-10 touch-manipulation"
         aria-label={`Pogledaj ${image.filename}`}
       />
       <Image
-        src={getImagePublicUrl(image.storage_path)}
+        src={getImageThumbnailUrl(image.storage_path)}
         alt={image.filename}
         fill
         sizes="(max-width: 640px) 50vw, 33vw"
-        className="object-cover transition-transform duration-500 group-hover:scale-105"
+        className="object-cover sm:transition-transform sm:duration-300 sm:group-hover:scale-105"
         loading="lazy"
         onLoad={(e) => {
           const img = e.currentTarget;
           if (img.naturalWidth && img.naturalHeight) {
-            setTileSize(getTileSize(index, img.naturalWidth / img.naturalHeight));
+            const next = getTileSize(index, img.naturalWidth / img.naturalHeight);
+            setTileSize((prev) => (prev === next ? prev : next));
           }
         }}
       />
 
       {count > 0 && <div className="absolute inset-0 bg-accent/10 pointer-events-none" />}
 
-      <div className="absolute left-2 top-2 z-20 flex items-center gap-1.5 rounded-full bg-black/50 px-2 py-1 backdrop-blur-sm">
+      <div className="absolute left-2 top-2 z-20 flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-1">
         <HeartStack count={count} />
       </div>
 
@@ -72,9 +75,9 @@ function MasonryTile({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onRemove();
+            onRemove(image.id);
           }}
-          className="absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-lg font-bold text-white backdrop-blur-sm transition hover:bg-red-500/80"
+          className="absolute right-2 top-2 z-20 flex h-8 w-8 touch-manipulation items-center justify-center rounded-full bg-black/70 text-lg font-bold text-white hover:bg-red-500/80"
           aria-label="Smanji broj"
         >
           −
@@ -85,12 +88,12 @@ function MasonryTile({
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          onAdd();
+          onAdd(image.id);
         }}
-        className={`absolute bottom-2 right-2 z-20 flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+        className={`absolute bottom-2 right-2 z-20 flex h-10 w-10 touch-manipulation items-center justify-center rounded-full ${
           count > 0
             ? "bg-accent text-bg-deep shadow-[0_0_16px_rgba(101,227,255,0.5)]"
-            : "bg-black/55 text-white/90 opacity-100 sm:bg-black/45"
+            : "bg-black/70 text-white/90 sm:bg-black/55"
         }`}
         aria-label="Dodaj srce"
       >
@@ -100,10 +103,18 @@ function MasonryTile({
       </button>
     </div>
   );
-}
+});
 
 export function MasonryGalleryGrid({ images, counts, onAdd, onRemove }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const handleOpen = useCallback((index: number) => {
+    setLightboxIndex(index);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setLightboxIndex(null);
+  }, []);
 
   return (
     <>
@@ -114,9 +125,9 @@ export function MasonryGalleryGrid({ images, counts, onAdd, onRemove }: Props) {
             image={img}
             index={index}
             count={counts[img.id] ?? 0}
-            onOpen={() => setLightboxIndex(index)}
-            onAdd={() => onAdd(img.id)}
-            onRemove={() => onRemove(img.id)}
+            onOpen={handleOpen}
+            onAdd={onAdd}
+            onRemove={onRemove}
           />
         ))}
       </div>
@@ -126,7 +137,7 @@ export function MasonryGalleryGrid({ images, counts, onAdd, onRemove }: Props) {
           images={images}
           activeIndex={lightboxIndex}
           counts={counts}
-          onClose={() => setLightboxIndex(null)}
+          onClose={handleClose}
           onNavigate={setLightboxIndex}
           onAdd={onAdd}
           onRemove={onRemove}

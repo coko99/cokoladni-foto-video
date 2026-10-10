@@ -32,6 +32,7 @@ export const navLinks = [
   { label: "Paketi", href: "/paketi" },
   { label: "O nama", href: "/o-nama" },
   { label: "Proces", href: "/proces" },
+  { label: "Izbor poza", href: "/poze" },
   { label: "Kontakt", href: "/kontakt" },
   { label: "Login", href: "/login" },
 ];

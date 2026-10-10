@@ -34,3 +34,20 @@ export function getImagePublicUrl(storagePath: string): string {
   if (!supabaseUrl) return storagePath;
   return `${supabaseUrl}/storage/v1/object/public/gallery-images/${storagePath}`;
 }
+
+export function getImageThumbnailUrl(storagePath: string, width = 480): string {
+  const supabaseUrl = getSupabaseUrl();
+  if (!supabaseUrl) return storagePath;
+  const encodedPath = storagePath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  return `${supabaseUrl}/storage/v1/render/image/public/gallery-images/${encodedPath}?width=${width}&quality=80&resize=contain`;
+}
+
+export function preloadImageUrl(url: string) {
+  if (typeof window === "undefined") return;
+  const img = new window.Image();
+  img.decoding = "async";
+  img.src = url;
+}
